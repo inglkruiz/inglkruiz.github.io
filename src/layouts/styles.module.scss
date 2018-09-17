@@ -1,0 +1,11 @@
+@import '../sass/bootstrap-core';
+
+.main {
+  margin-top: 8.5rem;
+}
+
+@include media-breakpoint-up(md) {
+  .main {
+    margin-top: 9.312rem;
+  }
+}
