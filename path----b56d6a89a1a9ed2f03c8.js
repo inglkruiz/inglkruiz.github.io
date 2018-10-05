@@ -1,2 +1,0 @@
-webpackJsonp([60335399758886],{102:function(i,e){i.exports={data:{site:{siteMetadata:{title:"inglkruiz.GitHub.io",description:"Luis Carlos Ruiz Delgado. Proactive & disciplined Senior Frontend Web Developer with rock-solid programming skills in JavaScript and latest web technologies",author:"inglkruiz",keywords:"inglkruiz, lkruiz, luis ruiz, senior frontend developer"}}},layoutContext:{}}}});
-//# sourceMappingURL=path----b56d6a89a1a9ed2f03c8.js.map
