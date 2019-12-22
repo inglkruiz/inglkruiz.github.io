@@ -34,7 +34,6 @@ class Layout extends React.Component {
       header = (
         <h3
           style={{
-            fontFamily: `Montserrat, sans-serif`,
             marginTop: 0,
           }}
         >
@@ -56,7 +55,7 @@ class Layout extends React.Component {
         style={{
           marginLeft: `auto`,
           marginRight: `auto`,
-          maxWidth: rhythm(24),
+          maxWidth: rhythm(32),
           padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
         }}
       >
