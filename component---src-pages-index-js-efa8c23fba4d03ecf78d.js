@@ -1,2 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[5],{141:function(n,e,o){"use strict";o.r(e);var r=o(0),t=o.n(r),a=o(146);e.default=function(){return t.a.createElement(a.a,null,"TODO: Show Apps running and repositories")}}}]);
-//# sourceMappingURL=component---src-pages-index-js-efa8c23fba4d03ecf78d.js.map
