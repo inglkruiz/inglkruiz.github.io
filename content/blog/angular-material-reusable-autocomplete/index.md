@@ -10,18 +10,18 @@ Before starting I will ask you to open the following link > [Stackblitz - Reusab
 
 ## User Story
 
-As User I want to be able to search X article by its name and select it.
+As User I want to be able to search X product by its name and select it.
 
 #### Conditions:
 
-1. When: I type 3 or more characters matching the article's name I want to see a list of options to select one of them.
+1. When: I type 3 or more characters matching the product's name I want to see a list of options to select one of them.
 2. When: The search is being carried out I want know it.
 3. When: The search has no results I want to know it.
 
 ## Developer's decisions
 
 1. Each option must have an Identifier (with that value I will know when a provided option was selected) and a label/text (which will replace the written text by the user after selecting an option).
-2. The form control must not know how to perform the options' search. I would like to use the same component to search for Y, Z or W article (being Y, Z and W of different categories). The input's placeholder and the number of characters to trigger the search action must be configurable.
+2. The form control must not know how to perform the options' search. I would like to use the same component to search for Y, Z or W product (being Y, Z and W of different categories). The input's placeholder and the number of characters to trigger the search action must be configurable.
 3. Since I pretend to use this component to execute other searches I will make the minimum characters' length to trigger the search a component parameter.
 
 ## Prerequisites
