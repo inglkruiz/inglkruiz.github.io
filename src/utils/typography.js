@@ -5,7 +5,7 @@ import { MOBILE_MEDIA_QUERY } from "typography-breakpoint-constants"
 fairyGatesTheme.overrideThemeStyles = ({ rhythm }) => {
   const linkColor = "#3ab159"
   return {
-    "body,h1,h2,h3,h4,h5,h6": {
+    "body,h1,h2,h3,h4,h5,h6,blockquote": {
       color: "#dfdfdf",
     },
     a: {

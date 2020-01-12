@@ -1,12 +1,38 @@
 ---
-title: Custom Angular Material Input Autocomplete form control
+title: Reusable Angular Material Input Autocomplete form control
 date: "2019-12-22"
-description: "In this example I will use an Angular Material Autocomplete form control and show how to implement <strong>@angular/forms ControlValueAccessor</strong> interface to build a custom form control. The form control will display a message (like an option) while it waits for results and a message when no results were found, finally it will render any template for options found using <strong>TemplateRefs</strong>."
+description: "In this example I will use an Angular Material Autocomplete form control and show how to implement <strong>@angular/forms ControlValueAccessor</strong> interface to build a reusable form control. The form control will display a message (like an option) while it waits for results and a message when no results were found."
 ---
 
-Today I am going to build a reusable Angular Material Autocomplete form control component and show how to implement the `ControlValueAccessor` interface from **_@angular/forms_** package. Besides that, in order to be able to display any layout for the autocomplete result options I am going to use a **Dynamic Template Creation** with the `ngTemplateOutlet` directive.
+In this example I want to show you how to implement the `ControlValueAccessor` interface from **_`@angular/forms`_** package in order to build a reusable Form Control.
 
-This implementation comes from a real use case I had at my current job. The component works in Angular v8.
+Before starting I will ask you to open the following link > [Stackblitz - Reusable Angular Material Input Autocomplete form control](https://stackblitz.com/edit/angular-sbcm7h-oibfvx) where you will find the working example. Along this post I will describe briefly the approach I took and my reasoning about some decisions.
+
+## User Story
+
+As User I want to be able to search X article by its name and select it.
+
+#### Conditions:
+
+1. When: I type 3 or more characters matching the article's name I want to see a list of options to select one of them.
+2. When: The search is being carried out I want know it.
+3. When: The search has no results I want to know it.
+
+## Developer's decisions
+
+1. Each option must have an Identifier (with that value I will know when a provided option was selected) and a label/text (which will replace the written text by the user after selecting an option).
+2. The form control must not know how to perform the options' search. I would like to use the same component to search for Y, Z or W article (being Y, Z and W of different categories). The input's placeholder and the number of characters to trigger the search action must be configurable.
+3. Since I pretend to use this component to execute other searches I will make the minimum characters' length to trigger the search a component parameter.
+
+## Prerequisites
+
+1. An Angular project v8+ with [Angular Material installed](https://material.angular.io/guide/getting-started#install-angular-material).
+2. Knowledge on how to use [Angular Reactive Forms](https://angular.io/guide/reactive-forms).
+3. Knowledge about the `ControlValueAccessor` interface. What is its purpose? In case you do not know about this here is a good video where [@karaforthewin](https://twitter.com/karaforthewin) explains advance topics on Angular Forms and 2 different approaches to implement the interface. Also you can find some other examples (I found most of them use the approach of providing `NG_VALUE_ACCESSOR`, here I do not).
+
+## Let's Do It
+
+I will create an Angular Module to export the component. Since I want to use it in other places this will give some portability. Remember this module will require to have installed Angular Material.
 
 Let's scaffold a component using `angular-cli`:
 
@@ -14,14 +40,9 @@ Let's scaffold a component using `angular-cli`:
 ng generate component input-autocomplete
 ```
 
-If you have not added Angular Material to your project you can do it with the next command:
+To build the component you will need to import into your Angular Module the following modules: `ReactiveFormsModule`, `MatInputModule`, `MatAutocompleteModule`, `MatOptionModule`, `MatIconModule`.
 
-```bash
-ng add @angular/material
-```
-
-To build the component you will need to import into your angular module the following modules: `ReactiveFormsModule`, `MatInputModule`, `MatAutocompleteModule`, `MatOptionModule`, `MatIconModule`.
-When I build reusable components I like to take the approach of creating an Angular Module to self-contain its dependencies and gain the ability of importing it anywhere I want. This is my component's module:
+#### Component's module
 
 ```javascript {numberLines:true}
 import { CommonModule } from "@angular/common"
@@ -51,11 +72,11 @@ import { InputAutocompleteComponent } from "./input-autocomplete.component"
 export class InputAutocompleteModule {}
 ```
 
-Now, let's work in the component.
+> Now, let's work in the component.
 
-### Template:
+#### Template:
 
-```html {numberLines:true}{25-32}
+```html {numberLines:true}
 <mat-form-field>
   <input
     matInput
@@ -65,6 +86,7 @@ Now, let's work in the component.
     [formControl]="inputControl"
     [placeholder]="placeholder"
     required
+    (blur)="onTouched()"
   />
   <mat-icon matSuffix>search</mat-icon>
   <mat-error *ngIf="!inputControl.valid && inputControl.errors?.required">
@@ -81,37 +103,42 @@ Now, let's work in the component.
   </mat-option>
 
   <ng-template #optionsTemplate>
-    <mat-option *ngFor="let option of options" [value]="option">
-      <ng-container
-        *ngTemplateOutlet="layoutTemplate; context: { option: option }"
-      >
-      </ng-container>
+    <mat-option
+      *ngFor="let option of options"
+      [value]="option"
+      class="provided"
+    >
+      {{ option.label }}
     </mat-option>
   </ng-template>
 
   <mat-option *ngIf="!isSearching && noResults" value="" disabled="true">
-    No results found
+    <b>No results found</b>
   </mat-option>
 </mat-autocomplete>
 ```
 
-To call your attention I highlighted the lines of code where the `ngTemplateOutlet` is used. The inner `ng-container` will render the template you want to project inside the component with the context passed, in this case each option object.
+Basically the template uses:
 
-### Controller
+- A `MatFormField` with a `MatInput` type text, and a `MatAutocomplete` as is described in the [component's guide](https://material.angular.io/components/autocomplete/overview#simple-autocomplete).
+- It uses 3 `MatOption` elements inside the `MatAutocomplete`:
+  - The 1st `MatOption` is to display a message while the search is running.
+  - The 2nd `MatOption` has a `*ngFor` directive and works IF results are found.
+  - The last `MatOption` is to display a message when no results are found.
 
-```javascript {numberLines:true}{56,60-61,69,92-102,118-138}
+#### Controller
+
+```javascript {numberLines:true}{55,72-75,94-106,121-141}
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
   Input,
   OnChanges,
   OnInit,
   Optional,
   Self,
   SimpleChanges,
-  TemplateRef,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -122,6 +149,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
+import { coerceNumberProperty } from '@angular/cdk/coercion';
 
 import { Observable } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -159,14 +187,18 @@ export class InputAutocompleteComponent
   @Input() placeholder: string;
   @Input() options: Identifiable[];
 
-  @ContentChild(TemplateRef, { static: false })
-  layoutTemplate: TemplateRef<any>;
-
   // Inner form control to link input text changes to mat autocomplete
   inputControl = new FormControl('', this.validators);
   searchResults: Observable<any>;
   noResults = false;
   isSearching = false;
+
+  private _lengthToTriggerSearch = 3;
+
+  @Input()
+  set lengthToTriggerSearch(value: number) {
+    this._lengthToTriggerSearch = coerceNumberProperty(value, 0);
+  }
 
   constructor(
     @Optional() @Self() private controlDir: NgControl,
@@ -269,7 +301,7 @@ export class InputAutocompleteComponent
   }
 
   isMinLength(value: string) {
-    return value.length > 2;
+    return value.length >= this._lengthToTriggerSearch;
   }
 
   private get validators(): ValidatorFn[] {
@@ -278,16 +310,15 @@ export class InputAutocompleteComponent
 }
 ```
 
-I try to write code to be self-explanatory and I hope you understand it.
-Key takeaways:
+I wrote code to be self-explanatory and I hope you understand it.
+Even though, here are some key takeaways:
 
-1. On line **56** the interface `ControlValueAccessor` is declared to be implemented by the component.
-2. On line **60** the component captures the template you want to project as the autocomplete option's layout.
-3. On line **69** the component constructor gets the instance of a `NgControl`. This means you can use `ngModel`
+1. On line **55** the interface `ControlValueAccessor` is declared to be implemented by the component.
+2. On line **72** the component constructor gets the instance of a `NgControl`. This means you can use `ngModel`
    or a `[formControl]` | `formControlName`, template driven or reactive form respectively.
-4. On line **92** `ngOnChanges` turn off `isSearching` state if the component receives options to display.
-   `isSearching` state is triggered when the user types a string with a length greater than 2 characters.
-5. On line **117** the `inputControl` object (which is a `FormControl` and receives updates from the input text)
+3. On line **94** `ngOnChanges` turn off `isSearching` state if the component receives options to display.
+   `isSearching` state is triggered when the user types a string with a length greater/equals than 3 characters (default).
+4. On line **120** the `inputControl` object (which is a `FormControl` and receives updates from the input text)
    communicates with the `NgControl` instance mentioned before. The following cases use cases are handled here:
    1. When the user types the value is a `string` and after length validation the value is passed
       (what to do with the text? the component does not know, he does not care). Outside the component
@@ -298,29 +329,28 @@ Key takeaways:
       a character (that action will make the component to emit a `string` value which then will provide
       options to select).
 
-Now, it is time show how to use the component.
+Observe it is not necessary to provide explicitly `NG_VALUE_ACCESSOR` dependency in the component and it is because `NgControl` dependency is declared (it is optional to avoid an error if is not present). The `NgControl` dependency connects the `ngModel` or `FormControl` directive you declare when using the component to the inner `FormControl` previously described which means this component will work with Angular Template Driven and Reactive Forms, but I encourage you to use the later one. Reactive forms seems to be a bit more complex conceptually speaking but are [more predictable](https://angular.io/guide/reactive-forms#introduction-to-reactive-forms).
+
+## Component's Usage
+
+Now, it is time show how to use the component. Do not forget to import the `InputAutocompleteModule` in your main module.
+
+#### Template
 
 ```html {numberLines:true}
 <form class="example-form" [formGroup]="form" (ngSubmit)="submit()">
   <input-autocomplete
     formControlName="pokemon"
-    placeholder="Pokemon name"
+    placeholder="Pokemon's name"
     [options]="pokemons$ | async"
   >
-    <ng-template let-option="option">
-      <div class="pokemon-option">
-        <img [src]="option.sprite" /> {{ option.label }}
-      </div>
-    </ng-template>
   </input-autocomplete>
   <input-autocomplete
     formControlName="swCharacter"
-    placeholder="SW character name"
+    placeholder="SW character's name"
+    lengthToTriggerSearch="2"
     [options]="swCharacters$ | async"
   >
-    <ng-template let-option="option">
-      {{ option.label }} ({{option.gender}})
-    </ng-template>
   </input-autocomplete>
   <div>
     <button mat-raised-button color="primary">submit</button>
@@ -328,15 +358,68 @@ Now, it is time show how to use the component.
 </form>
 ```
 
-Check this [Stackblitz](https://stackblitz.com/edit/angular-sbcm7h) to see how it works.
+#### Controller
 
-#### Future improvements
+```javascript {numberLines:true}
+import { Component, OnInit } from "@angular/core"
+import { FormControl, FormGroup } from "@angular/forms"
+import { of } from "rxjs"
+import { map, startWith, delay, switchMap } from "rxjs/operators"
 
-This component can be improved if:
+import { Identifiable } from "./input-autocomplete"
 
-1. You add an `@Input` to set the text's minimum length before triggering the search event.
-2. You add an `@Input` to set the text you want to display while options arrived, or the no results found text.
-   Use this hint if your app is multi-language, do not pollute the component adding a translate dependency.
-   The less the component knows the better.
+import { pokemons, swCharacters } from "./data"
 
-I did not code this improvements in this example because I wanted to keep it simple.
+/**
+ * @title Filter autocomplete
+ */
+@Component({
+  selector: "autocomplete-filter-example",
+  templateUrl: "autocomplete-filter-example.html",
+  styleUrls: ["autocomplete-filter-example.css"],
+})
+export class AutocompleteFilterExample implements OnInit {
+  form = new FormGroup({
+    pokemon: new FormControl(),
+    swCharacter: new FormControl(),
+  })
+
+  pokemons$ = this.form.get("pokemon").valueChanges.pipe(
+    startWith(null),
+    switchMap(name => {
+      if (typeof name === "string") {
+        return of(pokemons).pipe(
+          delay(800),
+          map(response =>
+            response.filter(p => p.label.toUpperCase().includes(name))
+          )
+        )
+      }
+      return of([])
+    })
+  )
+
+  swCharacters$ = this.form.get("swCharacter").valueChanges.pipe(
+    startWith(null),
+    switchMap(name => {
+      if (typeof name === "string") {
+        return of(swCharacters).pipe(
+          delay(800),
+          map(response =>
+            response.filter(p => p.label.toUpperCase().includes(name))
+          )
+        )
+      }
+      return of([])
+    })
+  )
+
+  ngOnInit() {}
+
+  submit() {
+    console.log(this.form.value)
+  }
+}
+```
+
+> I hope you liked it.

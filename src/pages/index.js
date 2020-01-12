@@ -19,6 +19,7 @@ class BlogIndex extends React.Component {
         {posts.map(({ node }) => {
           return (
             <PostTile
+              key={node.fields.slug}
               post={{
                 title: node.frontmatter.title || node.fields.slug,
                 slug: node.fields.slug,

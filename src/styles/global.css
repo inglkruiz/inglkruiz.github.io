@@ -60,6 +60,7 @@ pre[class*="language-"] {
 }
 
 p code[class*="language-text"],
-ol code[class*="language-text"] {
+ol code[class*="language-text"],
+ul code[class*="language-text"] {
   color: #e6db74;
 }
