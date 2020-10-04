@@ -14,13 +14,13 @@ Before starting I will ask you to open the following link > [Stackblitz - Reusab
 
 As User
 When I search X product by its name
-I want see other attributes regarding to the product.
+I want to see other attributes regarding to the product.
 
 > Consider that the User story I wrote is very very generic, this is just an example.
 
 ## Developer's decisions
 
-1. The template to be consume can be passed as a component's parameter but also can be capture from its content when is being used. I will take the later approach since I feel it is less confusing for developers, as a developer when I see that an element is written as projected content inside a component I expect it to be used only inside of it.
+1. The template to be consumed can be passed as a component's parameter but also can be capture from its content when is being used. I will take the later approach since I feel it is less confusing for developers, as a developer when I see that an element is written as projected content inside a component I expect it to be used only inside of it.
 
    #### Option 1
 
@@ -89,7 +89,7 @@ set lengthToTriggerSearch(value: number) {
 
 1. On line **28** a conditional verifies if `optionTemplate` exists. If it exists then it is projected inside a container with a given context object using the directive [NgTemplateOutlet
    ](https://angular.io/api/common/NgTemplateOutlet). The given context contains the option object.
-2. On line **34** there is still the default layout which address the case when the template is not present.
+2. On line **34** there is still the default layout which addresses the case when the template is not present.
 
 ## Component's Usage
 
