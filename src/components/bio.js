@@ -32,8 +32,9 @@ const Bio = () => {
       }}
     >
       <p>
-        Written by <strong>{author}</strong>. A proactive and disciplined Senior
-        Web Developer with rock-solid programming skills in JavaScript.
+        Written by <strong>{author}</strong>. A proactive and disciplined Sr.
+        Software Engineer (Full-stack Web Developer) with rock-solid programming
+        skills in Javascript/Typescript.
         <a
           style={{ textAlign: `right`, display: `block` }}
           href={`https://www.linkedin.com/in/${social.linkedIn}`}

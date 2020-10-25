@@ -25,6 +25,7 @@ class BlogIndex extends React.Component {
                 slug: node.fields.slug,
                 date: node.frontmatter.date,
                 description: node.frontmatter.description || node.excerpt,
+                readingTime: node.fields.readingTime.text,
               }}
             />
           )
@@ -49,6 +50,9 @@ export const pageQuery = graphql`
           excerpt
           fields {
             slug
+            readingTime {
+              text
+            }
           }
           frontmatter {
             date(formatString: "MMMM DD, YYYY")

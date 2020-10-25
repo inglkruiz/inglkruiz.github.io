@@ -44,7 +44,7 @@ To build the component you will need to import into your Angular Module the foll
 
 #### Component's module
 
-```javascript {numberLines:true}
+```typescript {numberLines:true}
 import { CommonModule } from "@angular/common"
 import { NgModule } from "@angular/core"
 import { ReactiveFormsModule } from "@angular/forms"
@@ -128,7 +128,7 @@ Basically the template uses:
 
 #### Controller
 
-```javascript {numberLines:true}{55,72-75,94-106,121-141}
+```typescript {numberLines:true}{55,72-75,94-106,124-144}
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -139,7 +139,7 @@ import {
   Optional,
   Self,
   SimpleChanges,
-} from '@angular/core';
+} from "@angular/core"
 import {
   AbstractControl,
   ControlValueAccessor,
@@ -148,15 +148,15 @@ import {
   ValidationErrors,
   ValidatorFn,
   Validators,
-} from '@angular/forms';
-import { coerceNumberProperty } from '@angular/cdk/coercion';
+} from "@angular/forms"
+import { coerceNumberProperty } from "@angular/cdk/coercion"
 
-import { Observable } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { Observable } from "rxjs"
+import { debounceTime } from "rxjs/operators"
 
 export interface Identifiable {
-  id: string | number;
-  label: string;
+  id: string | number
+  label: string
 }
 
 /**
@@ -164,8 +164,8 @@ export interface Identifiable {
  * object provided by material autocomplete options
  */
 function isAutocompleteOption(value: Identifiable): boolean {
-  if (!value || typeof value === 'string') return false;
-  return value.id > 0;
+  if (!value || typeof value === "string") return false
+  return value.id > 0
 }
 
 /**
@@ -173,64 +173,67 @@ function isAutocompleteOption(value: Identifiable): boolean {
  * control value to be an object.
  */
 function containsIdValidation(control: AbstractControl): ValidationErrors {
-  return isAutocompleteOption(control.value) ? null : { required: true };
+  return isAutocompleteOption(control.value) ? null : { required: true }
 }
 
 @Component({
-  selector: 'input-autocomplete',
-  templateUrl: './input-autocomplete.component.html',
-  styleUrls: ['./input-autocomplete.component.css'],
+  selector: "input-autocomplete",
+  templateUrl: "./input-autocomplete.component.html",
+  styleUrls: ["./input-autocomplete.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputAutocompleteComponent
   implements OnInit, ControlValueAccessor, OnChanges {
-  @Input() placeholder: string;
-  @Input() options: Identifiable[];
+  @Input() placeholder: string
+  @Input() options: Identifiable[]
 
   // Inner form control to link input text changes to mat autocomplete
-  inputControl = new FormControl('', this.validators);
-  searchResults: Observable<any>;
-  noResults = false;
-  isSearching = false;
+  inputControl = new FormControl("", this.validators)
+  searchResults: Observable<any>
+  noResults = false
+  isSearching = false
 
-  private _lengthToTriggerSearch = 3;
+  private _lengthToTriggerSearch = 3
 
   @Input()
   set lengthToTriggerSearch(value: number) {
-    this._lengthToTriggerSearch = coerceNumberProperty(value, 0);
+    this._lengthToTriggerSearch = coerceNumberProperty(value, 0)
   }
 
   constructor(
     @Optional() @Self() private controlDir: NgControl,
-    private changeDetectorRef: ChangeDetectorRef,
+    private changeDetectorRef: ChangeDetectorRef
   ) {
     if (this.controlDir) {
-      this.controlDir.valueAccessor = this;
+      this.controlDir.valueAccessor = this
     }
   }
 
   ngOnInit() {
     if (this.controlDir) {
       // Set validators for the outer ngControl equals to the inner
-      const control = this.controlDir.control;
+      const control = this.controlDir.control
       const validators = control.validator
         ? [control.validator, this.inputControl.validator]
-        : this.inputControl.validator;
-      control.setValidators(validators);
+        : this.inputControl.validator
+      control.setValidators(validators)
       // Update outer ngControl status
-      control.updateValueAndValidity({ emitEvent: false });
+      control.updateValueAndValidity({ emitEvent: false })
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.options) {
       if (this.isSearching) {
-        this.isSearching = false;
+        this.isSearching = false
 
-        if (!changes.options.firstChange && !changes.options.currentValue.length) {
-          this.noResults = true;
+        if (
+          !changes.options.firstChange &&
+          !changes.options.currentValue.length
+        ) {
+          this.noResults = true
         } else {
-          this.noResults = false;
+          this.noResults = false
         }
       }
     }
@@ -241,7 +244,7 @@ export class InputAutocompleteComponent
    * Update the model and changes needed for the view here.
    */
   writeValue(obj: any): void {
-    obj && this.inputControl.setValue(obj);
+    obj && this.inputControl.setValue(obj)
   }
 
   /**
@@ -250,26 +253,26 @@ export class InputAutocompleteComponent
   registerOnChange(fn: any): void {
     // Pass the value to the outer ngControl if it has an id otherwise pass null
     this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe({
-      next: value => {
-        if (typeof value === 'string') {
+      next: (value) => {
+        if (typeof value === "string") {
           if (this.isMinLength(value)) {
-            this.isSearching = true;
+            this.isSearching = true
             /**
              * Fire change detection to display the searching status option
              */
-            this.changeDetectorRef.detectChanges();
-            fn(value.toUpperCase());
+            this.changeDetectorRef.detectChanges()
+            fn(value.toUpperCase())
           } else {
-            this.isSearching = false;
-            this.noResults = false;
+            this.isSearching = false
+            this.noResults = false
 
-            fn(null);
+            fn(null)
           }
         } else {
-          fn(value);
+          fn(value)
         }
       },
-    });
+    })
   }
 
   /**
@@ -277,14 +280,14 @@ export class InputAutocompleteComponent
    * Save the function as a property to call later here.
    */
   registerOnTouched(fn: any): void {
-    this.onTouched = fn;
+    this.onTouched = fn
   }
 
   /**
    * Allows Angular to disable the input.
    */
   setDisabledState?(isDisabled: boolean): void {
-    isDisabled ? this.inputControl.disable() : this.inputControl.enable();
+    isDisabled ? this.inputControl.disable() : this.inputControl.enable()
   }
 
   /**
@@ -297,15 +300,15 @@ export class InputAutocompleteComponent
    * This is how result name is printed in the input box.
    */
   displayFn(result: Identifiable): string | undefined {
-    return result ? result.label : undefined;
+    return result ? result.label : undefined
   }
 
   isMinLength(value: string) {
-    return value.length >= this._lengthToTriggerSearch;
+    return value.length >= this._lengthToTriggerSearch
   }
 
   private get validators(): ValidatorFn[] {
-    return [Validators.required, containsIdValidation];
+    return [Validators.required, containsIdValidation]
   }
 }
 ```
@@ -318,7 +321,7 @@ Even though, here are some key takeaways:
    or a `[formControl]` | `formControlName`, template driven or reactive form respectively.
 3. On line **94** `ngOnChanges` turn off `isSearching` state if the component receives options to display.
    `isSearching` state is triggered when the user types a string with a length greater/equals than 3 characters (default).
-4. On line **120** the `inputControl` object (which is a `FormControl` and receives updates from the input text)
+4. On line **123** the `inputControl` object (which is a `FormControl` and receives updates from the input text)
    communicates with the `NgControl` instance mentioned before. The following cases use cases are handled here:
    1. When the user types the value is a `string` and after length validation the value is passed
       (what to do with the text? the component does not know, he does not care). Outside the component
@@ -360,7 +363,7 @@ Now, it is time show how to use the component. Do not forget to import the `Inpu
 
 #### Controller
 
-```javascript {numberLines:true}
+```typescript {numberLines:true}
 import { Component, OnInit } from "@angular/core"
 import { FormControl, FormGroup } from "@angular/forms"
 import { of } from "rxjs"
@@ -386,12 +389,12 @@ export class AutocompleteFilterExample implements OnInit {
 
   pokemons$ = this.form.get("pokemon").valueChanges.pipe(
     startWith(null),
-    switchMap(name => {
+    switchMap((name) => {
       if (typeof name === "string") {
         return of(pokemons).pipe(
           delay(800),
-          map(response =>
-            response.filter(p => p.label.toUpperCase().includes(name))
+          map((response) =>
+            response.filter((p) => p.label.toUpperCase().includes(name))
           )
         )
       }
@@ -401,12 +404,12 @@ export class AutocompleteFilterExample implements OnInit {
 
   swCharacters$ = this.form.get("swCharacter").valueChanges.pipe(
     startWith(null),
-    switchMap(name => {
+    switchMap((name) => {
       if (typeof name === "string") {
         return of(swCharacters).pipe(
           delay(800),
-          map(response =>
-            response.filter(p => p.label.toUpperCase().includes(name))
+          map((response) =>
+            response.filter((p) => p.label.toUpperCase().includes(name))
           )
         )
       }

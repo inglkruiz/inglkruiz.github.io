@@ -13,7 +13,7 @@ export default function PostTile({ post }) {
         >
           <Link to={post.slug}>{post.title}</Link>
         </h3>
-        <small>{post.date}</small>
+        <small>{post.date}</small> - {post.readingTime}
       </header>
       <section>
         <p
