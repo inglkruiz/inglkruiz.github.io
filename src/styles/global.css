@@ -64,3 +64,7 @@ ol code[class*="language-text"],
 ul code[class*="language-text"] {
   color: #e6db74;
 }
+
+.command-line-prompt {
+  line-height: 2;
+}

@@ -29,14 +29,13 @@ I want to see other attributes regarding to the product.
    <component-a [optionTemplate]="myTemplate"> </component-a>
    ```
 
+   #### Option 2
 
-    #### Option 2
-
-    ```html
-    <component-a>
-      <ng-template> </ng-template>
-    </component-a>
-    ```
+   ```html
+   <component-a>
+     <ng-template> </ng-template>
+   </component-a>
+   ```
 
 ## Prerequisites
 
@@ -49,7 +48,7 @@ Due to this post is based on a former post I will present only the small changes
 
 #### Controller
 
-```javascript {numberLines:59}{8-10}
+```typescript {numberLines:59}{8-10}
 // Inner form control to link input text changes to mat autocomplete
 inputControl = new FormControl('', this.validators);
 noResults = false;
@@ -80,9 +79,7 @@ set lengthToTriggerSearch(value: number) {
       >
       </ng-container>
     </ng-container>
-    <ng-container *ngIf="!optionTemplate">
-      {{ option.label }}
-    </ng-container>
+    <ng-container *ngIf="!optionTemplate"> {{ option.label }} </ng-container>
   </mat-option>
 </ng-template>
 ```
