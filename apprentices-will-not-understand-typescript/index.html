@@ -4,7 +4,7 @@
 <p>“Let’s teach Javascript on a configured Typescript environment”.</p>
 </blockquote>
 <p>The idea behind the suggestion is to leverage Typescript’s inferring capabilities on types and let apprentices discover them. Day by day, lesson by lesson, apprentices will learn by themselves that something is supporting them on their long learning Javascript journey, and myself as a coach, I could show them little by little Typescript types and its benefits. From my point of view, this will pay off in the long-term because from the beginning Javascript’s bad parts are avoided. Moreover, companies will love to hired junior developers who already know Typescript.</p>
-<p>But hey, what about <a href="https://flow.org">Flow</a>? In 2018 I configured a React project bundled with Webpack to include Flow and the result though it was good, the mere configuration task was tiring. In order to not discuss if Flow could be a good tool to learn, I will ask you to do yourself a favor, google it and search job descriptions where knowing Flow is a plus. I’m sure Typescript demand is already on track and by far is winning the poll.</p>
+<p>But hey, what about <a href="https://flow.org" rel="noopener" target="_blank">Flow</a>? In 2018 I configured a React project bundled with Webpack to include Flow and the result though it was good, the mere configuration task was tiring. In order to not discuss if Flow could be a good tool to learn, I will ask you to do yourself a favor, google it and search job descriptions where knowing Flow is a plus. I’m sure Typescript demand is already on track and by far is winning the poll.</p>
 <p>Now that you are back, you know I always like to start with a User Story, this time my user is an apprentice.</p>
 <h3>User Story</h3>
 <p>As Apprentice<br>
@@ -15,10 +15,10 @@ I want to code a Web project in an environment which provides me the following c
 </ol>
 <h3>Prerequisites</h3>
 <ol>
-<li>Might come handy to read what <a href="https://v2.parceljs.org/">Parcel.js</a> does.</li>
+<li>Might come handy to read what <a href="https://v2.parceljs.org/" rel="noopener" target="_blank">Parcel.js</a> does.</li>
 </ol>
 <h3>Let’s Do It</h3>
-<p>Previously, I developed this idea (when it was first presented, <a href="https://github.com/inglkruiz/js-sdk/tree/1.0.0">v1.0.0</a>) using Parcel.js <code class="language-text">v1.12.4</code> because as I mentioned before it was the beginning of the year 2020 and I wanted to deliver a functional project ASAP with stable dependencies (as of the time of this writing Parcel.js v2 is still in beta version). Now, nothing is pushing me to deliver fast and I had the idea of using the version <code class="language-text">v2.0.0-beta.1</code>, what could go wrong? I like to experiment and enjoy the journey.</p>
+<p>Previously, I developed this idea (when it was first presented, <a href="https://github.com/inglkruiz/js-sdk/tree/1.0.0" rel="noopener" target="_blank">v1.0.0</a> using Parcel.js <code class="language-text">v1.12.4</code> because as I mentioned before it was the beginning of the year 2020 and I wanted to deliver a functional project ASAP with stable dependencies (as of the time of this writing Parcel.js v2 is still in beta version). Now, nothing is pushing me to deliver fast and I had the idea of using the version <code class="language-text">v2.0.0-beta.1</code>, what could go wrong? I like to experiment and enjoy the journey.</p>
 <p>First, let’s create a folder for the project and inside of it set up a new NPM package:</p>
 <p><em>Using the console/terminal:</em></p>
 <div class="gatsby-highlight" data-language="bash"><pre class="language-bash"><code class="language-bash"><span class="command-line-prompt"><span data-user=inglkruiz data-host=localhost></span></span><span class="token function">mkdir</span> js-sdk <span class="token operator">&amp;&amp;</span> <span class="token builtin class-name">cd</span> ./js-sdk <span class="token operator">&amp;&amp;</span> <span class="token function">npm</span> init -y</code></pre></div>
