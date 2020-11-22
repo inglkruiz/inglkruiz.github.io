@@ -1,5 +1,5 @@
 ---
-title: Apprentices won't understand Typescript, I heard.
+title: Apprentices won't understand Typescript, I heard
 date: "2020-10-04"
 description: "Early this year I was asked to give an introductory <strong>Javascript</strong> course of three classes (something I already did in the past twice). Although, I like teaching I had to reject the idea and suggested to change to <strong>Typescript</strong>, the result? I built a small project using <strong>Parcel.js</strong> bundler, shared it, and got ignored."
 ---
