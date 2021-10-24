@@ -1,12 +1,12 @@
 ---
 title: Testing named exported recursive functions using Jest
 date: "2020-11-18"
-description: "In this post I will show you a functional approach approach for testing named exported recursive functions using Jest."
+description: "In this post I will show you a functional approach for testing named exported recursive functions using Jest."
 ---
 
 I'm starting to love Unit Testing, this old good practice adds so much value to any long-term product that I feel it should be mandatory in any software development team. I've realized that it increases your confidence as a software developer and helps your teammates to feel more comfortable when they review code because you are showing them what test cases you automated. And, I'm quite sure you will thank yourself in the future whenever you need or want to refactor some code.
 
-In this post I will show you a functional approach approach for testing named exported recursive functions using Jest.
+In this post I will show you a functional approach for testing named exported recursive functions using Jest.
 
 ### Prerequisites
 
