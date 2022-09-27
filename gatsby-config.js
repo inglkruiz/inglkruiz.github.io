@@ -1,7 +1,10 @@
 module.exports = {
   siteMetadata: {
     title: "WhateverJS Blog",
-    author: "Luis C. Ruiz",
+    author: {
+      name: "Luis C. Ruiz",
+      summary: "",
+    },
     description:
       "Luis Carlos Ruiz Delgado. Proactive & disciplined Senior Software Engineer with rock-solid programming skills in JavaScript/Typescript.",
     siteUrl: "https://inglkruiz.github.io/",
@@ -11,6 +14,7 @@ module.exports = {
     },
   },
   plugins: [
+    "gatsby-plugin-image",
     {
       resolve: "gatsby-source-filesystem",
       options: {
@@ -32,7 +36,7 @@ module.exports = {
           {
             resolve: "gatsby-remark-images",
             options: {
-              maxWidth: 590,
+              maxWidth: 630,
             },
           },
           {
@@ -53,7 +57,6 @@ module.exports = {
               },
             },
           },
-
           "gatsby-remark-copy-linked-files",
           "gatsby-remark-smartypants",
           "gatsby-remark-reading-time",
@@ -68,7 +71,59 @@ module.exports = {
         //trackingId: `ADD YOUR TRACKING ID HERE`,
       },
     },
-    "gatsby-plugin-feed",
+    {
+      resolve: `gatsby-plugin-feed`,
+      options: {
+        query: `
+          {
+            site {
+              siteMetadata {
+                title
+                description
+                siteUrl
+                site_url: siteUrl
+              }
+            }
+          }
+        `,
+        feeds: [
+          {
+            serialize: ({ query: { site, allMarkdownRemark } }) => {
+              return allMarkdownRemark.nodes.map((node) => {
+                return Object.assign({}, node.frontmatter, {
+                  description: node.excerpt,
+                  date: node.frontmatter.date,
+                  url: site.siteMetadata.siteUrl + node.fields.slug,
+                  guid: site.siteMetadata.siteUrl + node.fields.slug,
+                  custom_elements: [{ "content:encoded": node.html }],
+                })
+              })
+            },
+            query: `
+              {
+                allMarkdownRemark(
+                  sort: { order: DESC, fields: [frontmatter___date] },
+                ) {
+                  nodes {
+                    excerpt
+                    html
+                    fields {
+                      slug
+                    }
+                    frontmatter {
+                      title
+                      date
+                    }
+                  }
+                }
+              }
+            `,
+            output: "/rss.xml",
+            title: "Gatsby Starter Blog RSS Feed",
+          },
+        ],
+      },
+    },
     {
       resolve: "gatsby-plugin-manifest",
       options: {

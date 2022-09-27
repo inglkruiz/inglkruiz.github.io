@@ -5,8 +5,8 @@
  * See: https://www.gatsbyjs.org/docs/use-static-query/
  */
 
+import { graphql, useStaticQuery } from "gatsby"
 import React from "react"
-import { useStaticQuery, graphql } from "gatsby"
 
 import { rhythm } from "../utils/typography"
 
@@ -15,7 +15,9 @@ const Bio = () => {
     query BioQuery {
       site {
         siteMetadata {
-          author
+          author {
+            name
+          }
           social {
             linkedIn
           }
@@ -32,9 +34,9 @@ const Bio = () => {
       }}
     >
       <p>
-        Written by <strong>{author}</strong>. A proactive and disciplined Sr.
-        Software Engineer (Full-stack Web Developer) with rock-solid programming
-        skills in Javascript/Typescript.
+        Written by <strong>{author.name}</strong>. A proactive and disciplined
+        Sr. Software Engineer (Full-stack Web Developer) with rock-solid
+        programming skills in Javascript/Typescript.
         <a
           style={{ textAlign: `right`, display: `block` }}
           href={`https://www.linkedin.com/in/${social.linkedIn}`}
