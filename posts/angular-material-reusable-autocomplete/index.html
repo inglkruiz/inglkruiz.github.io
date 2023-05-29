@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reusable Angular Material Input Autocomplete form control</title>
+    <meta name="description" content="Luis Carlos Ruiz Delgado. Proactive &#38; disciplined Senior Software Engineer with rock-solid programming skills in JavaScript/Typescript.">
+    <meta name="author" content="Luis C. Ruiz">
+    <meta name="generator" content="Astro v2.4.5">
+
+    <!-- <link rel="alternate" type="application/rss+xml" href="/rss.xml" /> -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico" /> -->
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/_astro/_...slug_.0a39b8d7.css" /><script type="module">const e=(()=>typeof localStorage<"u"&&localStorage.getItem("theme")?localStorage.getItem("theme")??"tw-dark":window.matchMedia("(prefers-color-scheme: dark)").matches?"tw-dark":"tw-light")();e==="tw-light"?document.documentElement.classList.remove("tw-dark"):document.documentElement.classList.add("tw-dark");window.localStorage.setItem("theme",e);
+</script></head>
+  <body class="tw-container tw-mx-auto tw-min-h-screen tw-text-gray-600 dark:tw-bg-neutral-800 dark:tw-text-gray-300 tw-pt-8">
+    <header>
+    <h3>
+      <a href="/" class="tw-text-lg tw-font-semibold tw-text-neutral-100">
+        WhateverJS Blog
+      </a>
+    </h3>
+  </header>
+
+    <main class="tw-pb-20">
+      <article class="tw-prose tw-max-w-3xl tw-mx-auto">
+    <header id="postHeader" class="tw-sticky tw-top-0">
+      <div class="tw-pt-4 dark:tw-bg-neutral-800">
+        <h1 id="postTite" class="tw-text-2xl tw-font-semibold tw-mb-1">
+          Reusable Angular Material Input Autocomplete form control
+        </h1>
+        <small>
+          December 22, 2019
+        </small> - 9 min read
+      </div>
+      <div class="tw-h-6 dark:tw-bg-gradient-to-b dark:tw-from-neutral-800">
+      </div>
+    </header>
+    <div class="tw-text-right tw-mb-3">
+      <a class="primary-link" href="/posts/templateref-projection-with-context-inside-component">
+        TemplateRef projection with Context in an Angular Component →
+      </a>
+    </div>
+<a class="primary-link" href="/posts/whatever-js">
+      ← What is this Blog about?
+    </a>
+    <hr>
+
+    <p>In this example I want to show you how to implement the <code>ControlValueAccessor</code> interface from <strong><em><code>@angular/forms</code></em></strong> package in order to build a reusable Form Control.</p>
+<p>Before starting I will ask you to open the following link &gt; <a href="https://stackblitz.com/edit/angular-sbcm7h-oibfvx">Stackblitz - Reusable Angular Material Input Autocomplete form control</a> where you will find the working example. Along this post I will describe briefly the approach I took and my reasoning about some decisions.</p>
+<h2 id="user-story">User Story</h2>
+<p>As User I want to be able to search X product by its name and select it.</p>
+<h4 id="conditions">Conditions</h4>
+<ol>
+<li>When: I type 3 or more characters matching the product’s name I want to see a list of options to select one of them.</li>
+<li>When: The search is being carried out I want know it.</li>
+<li>When: The search has no results I want to know it.</li>
+</ol>
+<h2 id="developers-decisions">Developer’s decisions</h2>
+<ol>
+<li>Each option must have an Identifier (with that value I will know when a provided option was selected) and a label/text (which will replace the written text by the user after selecting an option).</li>
+<li>The form control must not know how to perform the options’ search. I would like to use the same component to search for Y, Z or W product (being Y, Z and W of different categories). The input’s placeholder and the number of characters to trigger the search action must be configurable.</li>
+<li>Since I pretend to use this component to execute other searches I will make the minimum characters’ length to trigger the search a component parameter.</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<ol>
+<li>An Angular project v8+ with <a href="https://material.angular.io/guide/getting-started#install-angular-material">Angular Material installed</a>.</li>
+<li>Knowledge on how to use <a href="https://angular.io/guide/reactive-forms">Angular Reactive Forms</a>.</li>
+<li>Knowledge about the <code>ControlValueAccessor</code> interface. What is its purpose? In case you do not know about this here is a good video where <a href="https://twitter.com/karaforthewin">@karaforthewin</a> explains advance topics on Angular Forms and 2 different approaches to implement the interface. Also you can find some other examples (I found most of them use the approach of providing <code>NG_VALUE_ACCESSOR</code>, here I do not).</li>
+</ol>
+<h2 id="lets-do-it">Let’s Do It</h2>
+<p>I will create an Angular Module to export the component. Since I want to use it in other places this will give some portability. Remember this module will require to have installed Angular Material.</p>
+<p>Let’s scaffold a component using <code>angular-cli</code>:</p>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="no-line-numbers" style=""><span class="line"><span style="color: #50FA7B">$</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">ng</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">generate</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">component</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">input-autocomplete</span></span></code></pre>
+<p>To build the component you will need to import into your Angular Module the following modules: <code>ReactiveFormsModule</code>, <code>MatInputModule</code>, <code>MatAutocompleteModule</code>, <code>MatOptionModule</code>, <code>MatIconModule</code>.</p>
+<h4 id="components-module">Component’s module</h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { CommonModule } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/common</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { NgModule } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/core</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { ReactiveFormsModule } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/forms</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  MatAutocompleteModule,</span></span>
+<span class="line"><span style="color:#F8F8F2">  MatIconModule,</span></span>
+<span class="line"><span style="color:#F8F8F2">  MatInputModule,</span></span>
+<span class="line"><span style="color:#F8F8F2">  MatOptionModule,</span></span>
+<span class="line"><span style="color:#F8F8F2">} </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/material</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { InputAutocompleteComponent } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">./input-autocomplete.component</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">@</span><span style="color:#50FA7B">NgModule</span><span style="color:#F8F8F2">({</span></span>
+<span class="line"><span style="color:#F8F8F2">  declarations</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span><span style="color:#50FA7B;font-style:italic">InputAutocompleteComponent</span><span style="color:#F8F8F2">],</span></span>
+<span class="line"><span style="color:#F8F8F2">  imports</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">CommonModule</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">ReactiveFormsModule</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">MatInputModule</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">MatAutocompleteModule</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">MatOptionModule</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">MatIconModule</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  ],</span></span>
+<span class="line"><span style="color:#F8F8F2">  exports</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span><span style="color:#50FA7B;font-style:italic">InputAutocompleteComponent</span><span style="color:#F8F8F2">],</span></span>
+<span class="line"><span style="color:#F8F8F2">})</span></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">class</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD">InputAutocompleteModule</span><span style="color:#F8F8F2"> {}</span></span></code></pre>
+<blockquote>
+<p>Now, let’s work in the component.</p>
+</blockquote>
+<h4 id="template">Template</h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">mat-form-field</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">input</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">matInput</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">type</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">text</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">[matAutocomplete]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">auto</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">matAutocompletePosition</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">below</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">[formControl]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">inputControl</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">[placeholder]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">placeholder</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">required</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">(blur)</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">onTouched()</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  /&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">mat-icon</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">matSuffix</span><span style="color:#F8F8F2">&gt;search&lt;/</span><span style="color:#FF79C6">mat-icon</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">mat-error</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">*ngIf</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">!inputControl.valid &amp;&amp; inputControl.errors?.required</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    This field is required</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">mat-error</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;/</span><span style="color:#FF79C6">mat-form-field</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">mat-autocomplete</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">#auto</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">matAutocomplete</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">autoActiveFirstOption</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">true</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">[displayWith]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">displayFn</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">mat-option</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">*ngIf</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">isSearching; else optionsTemplate</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">disabled</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">true</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">em</span><span style="color:#F8F8F2">&gt;Searching...&lt;/</span><span style="color:#FF79C6">em</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">mat-option</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">#optionsTemplate</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">mat-option</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#50FA7B;font-style:italic">*ngFor</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">let option of options</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#50FA7B;font-style:italic">[value]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">option</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#50FA7B;font-style:italic">class</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">provided</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">      {{ option.label }}</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;/</span><span style="color:#FF79C6">mat-option</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">mat-option</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">*ngIf</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">!isSearching &amp;&amp; noResults</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">value</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;&quot;</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">disabled</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">true</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">b</span><span style="color:#F8F8F2">&gt;No results found&lt;/</span><span style="color:#FF79C6">b</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">mat-option</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;/</span><span style="color:#FF79C6">mat-autocomplete</span><span style="color:#F8F8F2">&gt;</span></span></code></pre>
+<p>Basically the template uses:</p>
+<ul>
+<li>A <code>MatFormField</code> with a <code>MatInput</code> type text, and a <code>MatAutocomplete</code> as is described in the <a href="https://material.angular.io/components/autocomplete/overview#simple-autocomplete">component’s guide</a>.</li>
+<li>It uses 3 <code>MatOption</code> elements inside the <code>MatAutocomplete</code>:
+<ul>
+<li>The 1st <code>MatOption</code> is to display a message while the search is running.</li>
+<li>The 2nd <code>MatOption</code> has a <code>*ngFor</code> directive and works IF results are found.</li>
+<li>The last <code>MatOption</code> is to display a message when no results are found.</li>
+</ul>
+</li>
+</ul>
+<h4 id="controller">Controller</h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  ChangeDetectionStrategy,</span></span>
+<span class="line"><span style="color:#F8F8F2">  ChangeDetectorRef,</span></span>
+<span class="line"><span style="color:#F8F8F2">  Component,</span></span>
+<span class="line"><span style="color:#F8F8F2">  Input,</span></span>
+<span class="line"><span style="color:#F8F8F2">  OnChanges,</span></span>
+<span class="line"><span style="color:#F8F8F2">  OnInit,</span></span>
+<span class="line"><span style="color:#F8F8F2">  Optional,</span></span>
+<span class="line"><span style="color:#F8F8F2">  Self,</span></span>
+<span class="line"><span style="color:#F8F8F2">  SimpleChanges,</span></span>
+<span class="line"><span style="color:#F8F8F2">} </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/core</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  AbstractControl,</span></span>
+<span class="line"><span style="color:#F8F8F2">  ControlValueAccessor,</span></span>
+<span class="line"><span style="color:#F8F8F2">  FormControl,</span></span>
+<span class="line"><span style="color:#F8F8F2">  NgControl,</span></span>
+<span class="line"><span style="color:#F8F8F2">  ValidationErrors,</span></span>
+<span class="line"><span style="color:#F8F8F2">  ValidatorFn,</span></span>
+<span class="line"><span style="color:#F8F8F2">  Validators,</span></span>
+<span class="line"><span style="color:#F8F8F2">} </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/forms</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { coerceNumberProperty } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/cdk/coercion</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { Observable } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">rxjs</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { debounceTime } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">rxjs/operators</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">interface</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">Identifiable</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  id</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">|</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">number</span></span>
+<span class="line"><span style="color:#F8F8F2">  label</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">string</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4"> * Validates if the value passed has a code in order to be declared as an</span></span>
+<span class="line"><span style="color:#6272A4"> * object provided by material autocomplete options</span></span>
+<span class="line"><span style="color:#6272A4"> */</span></span>
+<span class="line"><span style="color:#FF79C6">function</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">isAutocompleteOption</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">value</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">Identifiable</span><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">boolean</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span><span style="color:#FF79C6">!</span><span style="color:#F8F8F2">value </span><span style="color:#FF79C6">||</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">typeof</span><span style="color:#F8F8F2"> value </span><span style="color:#FF79C6">===</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">string</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">false</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> value.id </span><span style="color:#FF79C6">&gt;</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">0</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4"> * Validates the control value to have an `id` attribute. It is expected</span></span>
+<span class="line"><span style="color:#6272A4"> * control value to be an object.</span></span>
+<span class="line"><span style="color:#6272A4"> */</span></span>
+<span class="line"><span style="color:#FF79C6">function</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">containsIdValidation</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">control</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">AbstractControl</span><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">ValidationErrors</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">isAutocompleteOption</span><span style="color:#F8F8F2">(control.value) </span><span style="color:#FF79C6">?</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">null</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> { required</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">true</span><span style="color:#F8F8F2"> }</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">@</span><span style="color:#50FA7B">Component</span><span style="color:#F8F8F2">({</span></span>
+<span class="line"><span style="color:#F8F8F2">  selector</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">input-autocomplete</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  templateUrl</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">./input-autocomplete.component.html</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  styleUrls</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">./input-autocomplete.component.css</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">],</span></span>
+<span class="line"><span style="color:#F8F8F2">  changeDetection</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">ChangeDetectionStrategy</span><span style="color:#F8F8F2">.</span><span style="color:#50FA7B;font-style:italic">OnPush</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">})</span></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">class</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD">InputAutocompleteComponent</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">implements</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">OnInit</span><span style="color:#F8F8F2">, </span><span style="color:#8BE9FD;font-style:italic">ControlValueAccessor</span><span style="color:#F8F8F2">, </span><span style="color:#8BE9FD;font-style:italic">OnChanges</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  @</span><span style="color:#50FA7B">Input</span><span style="color:#F8F8F2">() placeholder</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">string</span></span>
+<span class="line"><span style="color:#F8F8F2">  @</span><span style="color:#50FA7B">Input</span><span style="color:#F8F8F2">() options</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">Identifiable</span><span style="color:#F8F8F2">[]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#6272A4">// Inner form control to link input text changes to mat autocomplete</span></span>
+<span class="line"><span style="color:#F8F8F2">  inputControl </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6;font-weight:bold">new</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">FormControl</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;&quot;</span><span style="color:#F8F8F2">, </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.validators)</span></span>
+<span class="line"><span style="color:#F8F8F2">  searchResults</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">Observable</span><span style="color:#F8F8F2">&lt;</span><span style="color:#8BE9FD;font-style:italic">any</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  noResults </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">false</span></span>
+<span class="line"><span style="color:#F8F8F2">  isSearching </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">false</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">private</span><span style="color:#F8F8F2"> _lengthToTriggerSearch </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  @</span><span style="color:#50FA7B">Input</span><span style="color:#F8F8F2">()</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">set</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">lengthToTriggerSearch</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">value</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">number</span><span style="color:#F8F8F2">) {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">._lengthToTriggerSearch </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">coerceNumberProperty</span><span style="color:#F8F8F2">(value, </span><span style="color:#BD93F9">0</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">constructor</span><span style="color:#F8F8F2">(</span></span>
+<span class="line"><span style="color:#F8F8F2">    @</span><span style="color:#50FA7B">Optional</span><span style="color:#F8F8F2">() @</span><span style="color:#50FA7B">Self</span><span style="color:#F8F8F2">() </span><span style="color:#FF79C6">private</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">controlDir</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">NgControl</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">private</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">changeDetectorRef</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">ChangeDetectorRef</span></span>
+<span class="line"><span style="color:#F8F8F2">  ) {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.controlDir) {</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.controlDir.valueAccessor </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span></span>
+<span class="line"><span style="color:#F8F8F2">    }</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">ngOnInit</span><span style="color:#F8F8F2">() {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.controlDir) {</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#6272A4">// Set validators for the outer ngControl equals to the inner</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> control </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.controlDir.control</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> validators </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> control.validator</span></span>
+<span class="line"><span style="color:#F8F8F2">        </span><span style="color:#FF79C6">?</span><span style="color:#F8F8F2"> [control.validator, </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.inputControl.validator]</span></span>
+<span class="line"><span style="color:#F8F8F2">        </span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.inputControl.validator</span></span>
+<span class="line"><span style="color:#F8F8F2">      control.</span><span style="color:#50FA7B">setValidators</span><span style="color:#F8F8F2">(validators)</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#6272A4">// Update outer ngControl status</span></span>
+<span class="line"><span style="color:#F8F8F2">      control.</span><span style="color:#50FA7B">updateValueAndValidity</span><span style="color:#F8F8F2">({ emitEvent</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">false</span><span style="color:#F8F8F2"> })</span></span>
+<span class="line"><span style="color:#F8F8F2">    }</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">ngOnChanges</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">changes</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">SimpleChanges</span><span style="color:#F8F8F2">) {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (changes.options) {</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.isSearching) {</span></span>
+<span class="line"><span style="color:#F8F8F2">        </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.isSearching </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">false</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">        </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#FF79C6">!</span><span style="color:#F8F8F2">changes.options.firstChange </span><span style="color:#FF79C6">&amp;&amp;</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#FF79C6">!</span><span style="color:#F8F8F2">changes.options.currentValue.length</span></span>
+<span class="line"><span style="color:#F8F8F2">        ) {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.noResults </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">true</span></span>
+<span class="line"><span style="color:#F8F8F2">        } </span><span style="color:#FF79C6">else</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.noResults </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">false</span></span>
+<span class="line"><span style="color:#F8F8F2">        }</span></span>
+<span class="line"><span style="color:#F8F8F2">      }</span></span>
+<span class="line"><span style="color:#F8F8F2">    }</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4">   * Allows Angular to update the inputControl.</span></span>
+<span class="line"><span style="color:#6272A4">   * Update the model and changes needed for the view here.</span></span>
+<span class="line"><span style="color:#6272A4">   */</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">writeValue</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">obj</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">any</span><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">void</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    obj </span><span style="color:#FF79C6">&amp;&amp;</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.inputControl.</span><span style="color:#50FA7B">setValue</span><span style="color:#F8F8F2">(obj)</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4">   * Allows Angular to register a function to call when the inputControl changes.</span></span>
+<span class="line"><span style="color:#6272A4">   */</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">registerOnChange</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">fn</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">any</span><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">void</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#6272A4">// Pass the value to the outer ngControl if it has an id otherwise pass null</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.inputControl.valueChanges.</span><span style="color:#50FA7B">pipe</span><span style="color:#F8F8F2">(</span><span style="color:#50FA7B">debounceTime</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">300</span><span style="color:#F8F8F2">)).</span><span style="color:#50FA7B">subscribe</span><span style="color:#F8F8F2">({</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#50FA7B">next</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> (</span><span style="color:#FFB86C;font-style:italic">value</span><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">        </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span><span style="color:#FF79C6">typeof</span><span style="color:#F8F8F2"> value </span><span style="color:#FF79C6">===</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">string</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">) {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.</span><span style="color:#50FA7B">isMinLength</span><span style="color:#F8F8F2">(value)) {</span></span>
+<span class="line"><span style="color:#F8F8F2">            </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.isSearching </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">true</span></span>
+<span class="line"><span style="color:#F8F8F2">            </span><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4">             * Fire change detection to display the searching status option</span></span>
+<span class="line"><span style="color:#6272A4">             */</span></span>
+<span class="line"><span style="color:#F8F8F2">            </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.changeDetectorRef.</span><span style="color:#50FA7B">detectChanges</span><span style="color:#F8F8F2">()</span></span>
+<span class="line"><span style="color:#F8F8F2">            </span><span style="color:#50FA7B">fn</span><span style="color:#F8F8F2">(value.</span><span style="color:#50FA7B">toUpperCase</span><span style="color:#F8F8F2">())</span></span>
+<span class="line"><span style="color:#F8F8F2">          } </span><span style="color:#FF79C6">else</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">            </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.isSearching </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">false</span></span>
+<span class="line"><span style="color:#F8F8F2">            </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.noResults </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">false</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">            </span><span style="color:#50FA7B">fn</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">null</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"><span style="color:#F8F8F2">          }</span></span>
+<span class="line"><span style="color:#F8F8F2">        } </span><span style="color:#FF79C6">else</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#50FA7B">fn</span><span style="color:#F8F8F2">(value)</span></span>
+<span class="line"><span style="color:#F8F8F2">        }</span></span>
+<span class="line"><span style="color:#F8F8F2">      },</span></span>
+<span class="line"><span style="color:#F8F8F2">    })</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4">   * Allows Angular to register a function to call when the input has been touched.</span></span>
+<span class="line"><span style="color:#6272A4">   * Save the function as a property to call later here.</span></span>
+<span class="line"><span style="color:#6272A4">   */</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">registerOnTouched</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">fn</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">any</span><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">void</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.onTouched </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> fn</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4">   * Allows Angular to disable the input.</span></span>
+<span class="line"><span style="color:#6272A4">   */</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">setDisabledState</span><span style="color:#FF79C6">?</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">isDisabled</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">boolean</span><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">void</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    isDisabled </span><span style="color:#FF79C6">?</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.inputControl.</span><span style="color:#50FA7B">disable</span><span style="color:#F8F8F2">() </span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.inputControl.</span><span style="color:#50FA7B">enable</span><span style="color:#F8F8F2">()</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4">   * Function to call when the input is touched.</span></span>
+<span class="line"><span style="color:#6272A4">   */</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">onTouched</span><span style="color:#F8F8F2">() {}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4">   * Method linked to the mat-autocomplete `[displayWith]` input.</span></span>
+<span class="line"><span style="color:#6272A4">   * This is how result name is printed in the input box.</span></span>
+<span class="line"><span style="color:#6272A4">   */</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">displayFn</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">result</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">Identifiable</span><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">|</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">undefined</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> result </span><span style="color:#FF79C6">?</span><span style="color:#F8F8F2"> result.label </span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">undefined</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">isMinLength</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">value</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">string</span><span style="color:#F8F8F2">) {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> value.length </span><span style="color:#FF79C6">&gt;=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">._lengthToTriggerSearch</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">private</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">get</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">validators</span><span style="color:#F8F8F2">()</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">ValidatorFn</span><span style="color:#F8F8F2">[] {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> [Validators.required, containsIdValidation]</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>I wrote code to be self-explanatory and I hope you understand it.
+Even though, here are some key takeaways:</p>
+<ol>
+<li>On line <strong>55</strong> the interface <code>ControlValueAccessor</code> is declared to be implemented by the component.</li>
+<li>On line <strong>72</strong> the component constructor gets the instance of a <code>NgControl</code>. This means you can use <code>ngModel</code>
+or a <code>[formControl]</code> | <code>formControlName</code>, template driven or reactive form respectively.</li>
+<li>On line <strong>94</strong> <code>ngOnChanges</code> turn off <code>isSearching</code> state if the component receives options to display.
+<code>isSearching</code> state is triggered when the user types a string with a length greater/equals than 3 characters (default).</li>
+<li>On line <strong>123</strong> the <code>inputControl</code> object (which is a <code>FormControl</code> and receives updates from the input text)
+communicates with the <code>NgControl</code> instance mentioned before. The following cases use cases are handled here:
+<ol>
+<li>When the user types the value is a <code>string</code> and after length validation the value is passed
+(what to do with the text? the component does not know, he does not care). Outside the component
+you have to react to this value, fetch, and filter the values. Since this options are received as
+a component input then they will be rendered.</li>
+<li>When the component renders some options to click and the user chooses one then the value is passed
+to the outer <code>NgControl</code> instance. The value selected will remain unless the user cleans or removes
+a character (that action will make the component to emit a <code>string</code> value which then will provide
+options to select).</li>
+</ol>
+</li>
+</ol>
+<p>Observe it is not necessary to provide explicitly <code>NG_VALUE_ACCESSOR</code> dependency in the component and it is because <code>NgControl</code> dependency is declared (it is optional to avoid an error if is not present). The <code>NgControl</code> dependency connects the <code>ngModel</code> or <code>FormControl</code> directive you declare when using the component to the inner <code>FormControl</code> previously described which means this component will work with Angular Template Driven and Reactive Forms, but I encourage you to use the later one. Reactive forms seems to be a bit more complex conceptually speaking but are <a href="https://angular.io/guide/reactive-forms#introduction-to-reactive-forms">more predictable</a>.</p>
+<h2 id="components-usage">Component’s Usage</h2>
+<p>Now, it is time show how to use the component. Do not forget to import the <code>InputAutocompleteModule</code> in your main module.</p>
+<h4 id="template-1">Template</h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">form</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">class</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">example-form</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">[formGroup]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">form</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">(ngSubmit)</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">submit()</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">input-autocomplete</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">formControlName</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">pokemon</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">placeholder</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Pokemon&#39;s name</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">[options]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">pokemons$ | async</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">input-autocomplete</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">input-autocomplete</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">formControlName</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">swCharacter</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">placeholder</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">SW character&#39;s name</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">lengthToTriggerSearch</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">2</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B;font-style:italic">[options]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">swCharacters$ | async</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">input-autocomplete</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">div</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">button</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">mat-raised-button</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">color</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">primary</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;submit&lt;/</span><span style="color:#FF79C6">button</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">div</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;/</span><span style="color:#FF79C6">form</span><span style="color:#F8F8F2">&gt;</span></span></code></pre>
+<h4 id="controller-1">Controller</h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { Component, OnInit } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/core</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { FormControl, FormGroup } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@angular/forms</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { of } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">rxjs</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { map, startWith, delay, switchMap } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">rxjs/operators</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { Identifiable } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">./input-autocomplete</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> { pokemons, swCharacters } </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">./data</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6272A4">/**</span></span>
+<span class="line"><span style="color:#6272A4"> * </span><span style="color:#FF79C6">@title</span><span style="color:#6272A4"> Filter autocomplete</span></span>
+<span class="line"><span style="color:#6272A4"> */</span></span>
+<span class="line"><span style="color:#F8F8F2">@</span><span style="color:#50FA7B">Component</span><span style="color:#F8F8F2">({</span></span>
+<span class="line"><span style="color:#F8F8F2">  selector</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">autocomplete-filter-example</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  templateUrl</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">autocomplete-filter-example.html</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  styleUrls</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">autocomplete-filter-example.css</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">],</span></span>
+<span class="line"><span style="color:#F8F8F2">})</span></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">class</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD">AutocompleteFilterExample</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">implements</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">OnInit</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  form </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6;font-weight:bold">new</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">FormGroup</span><span style="color:#F8F8F2">({</span></span>
+<span class="line"><span style="color:#F8F8F2">    pokemon</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6;font-weight:bold">new</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">FormControl</span><span style="color:#F8F8F2">(),</span></span>
+<span class="line"><span style="color:#F8F8F2">    swCharacter</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6;font-weight:bold">new</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">FormControl</span><span style="color:#F8F8F2">(),</span></span>
+<span class="line"><span style="color:#F8F8F2">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  pokemons$ </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.form.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">pokemon</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">).valueChanges.</span><span style="color:#50FA7B">pipe</span><span style="color:#F8F8F2">(</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">startWith</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">null</span><span style="color:#F8F8F2">),</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">switchMap</span><span style="color:#F8F8F2">((</span><span style="color:#FFB86C;font-style:italic">name</span><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span><span style="color:#FF79C6">typeof</span><span style="color:#F8F8F2"> name </span><span style="color:#FF79C6">===</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">string</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">) {</span></span>
+<span class="line"><span style="color:#F8F8F2">        </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">of</span><span style="color:#F8F8F2">(pokemons).</span><span style="color:#50FA7B">pipe</span><span style="color:#F8F8F2">(</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#50FA7B">delay</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">800</span><span style="color:#F8F8F2">),</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#50FA7B">map</span><span style="color:#F8F8F2">((</span><span style="color:#FFB86C;font-style:italic">response</span><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">            response.</span><span style="color:#50FA7B">filter</span><span style="color:#F8F8F2">((</span><span style="color:#FFB86C;font-style:italic">p</span><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> p.label.</span><span style="color:#50FA7B">toUpperCase</span><span style="color:#F8F8F2">().</span><span style="color:#50FA7B">includes</span><span style="color:#F8F8F2">(name))</span></span>
+<span class="line"><span style="color:#F8F8F2">          )</span></span>
+<span class="line"><span style="color:#F8F8F2">        )</span></span>
+<span class="line"><span style="color:#F8F8F2">      }</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">of</span><span style="color:#F8F8F2">([])</span></span>
+<span class="line"><span style="color:#F8F8F2">    })</span></span>
+<span class="line"><span style="color:#F8F8F2">  )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  swCharacters$ </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.form.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">swCharacter</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">).valueChanges.</span><span style="color:#50FA7B">pipe</span><span style="color:#F8F8F2">(</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">startWith</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">null</span><span style="color:#F8F8F2">),</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">switchMap</span><span style="color:#F8F8F2">((</span><span style="color:#FFB86C;font-style:italic">name</span><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (</span><span style="color:#FF79C6">typeof</span><span style="color:#F8F8F2"> name </span><span style="color:#FF79C6">===</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">string</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">) {</span></span>
+<span class="line"><span style="color:#F8F8F2">        </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">of</span><span style="color:#F8F8F2">(swCharacters).</span><span style="color:#50FA7B">pipe</span><span style="color:#F8F8F2">(</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#50FA7B">delay</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">800</span><span style="color:#F8F8F2">),</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#50FA7B">map</span><span style="color:#F8F8F2">((</span><span style="color:#FFB86C;font-style:italic">response</span><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">            response.</span><span style="color:#50FA7B">filter</span><span style="color:#F8F8F2">((</span><span style="color:#FFB86C;font-style:italic">p</span><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> p.label.</span><span style="color:#50FA7B">toUpperCase</span><span style="color:#F8F8F2">().</span><span style="color:#50FA7B">includes</span><span style="color:#F8F8F2">(name))</span></span>
+<span class="line"><span style="color:#F8F8F2">          )</span></span>
+<span class="line"><span style="color:#F8F8F2">        )</span></span>
+<span class="line"><span style="color:#F8F8F2">      }</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">of</span><span style="color:#F8F8F2">([])</span></span>
+<span class="line"><span style="color:#F8F8F2">    })</span></span>
+<span class="line"><span style="color:#F8F8F2">  )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">ngOnInit</span><span style="color:#F8F8F2">() {}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">submit</span><span style="color:#F8F8F2">() {</span></span>
+<span class="line"><span style="color:#F8F8F2">    console.</span><span style="color:#50FA7B">log</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9;font-style:italic">this</span><span style="color:#F8F8F2">.form.value)</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<blockquote>
+<p>I hope you liked it.</p>
+</blockquote>
+
+    <footer>
+      <div class="tw-text-right tw-mb-3">
+      <a class="primary-link" href="/posts/templateref-projection-with-context-inside-component">
+        TemplateRef projection with Context in an Angular Component →
+      </a>
+    </div>
+<a class="primary-link" href="/posts/whatever-js">
+      ← What is this Blog about?
+    </a>
+      <hr>
+      <p>
+  Written by <strong>Luis C. Ruiz</strong>. A proactive and disciplined
+  Sr. Software Engineer with rock-solid programming skills in
+  Javascript/Typescript.
+</p>
+<p class="tw-text-right">
+  <a class="primary-link" href="https://www.linkedin.com/in/inglkruiz" target="_blank" rel="noopener noreferrer">
+    Read more about me on LinkedIn.
+  </a>
+</p>
+    </footer>
+  </article>
+    </main>
+
+    <footer class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-10 tw-pb-4 tw-w-full dark:tw-bg-gradient-to-t dark:tw-from-neutral-800 dark:tw-via-neutral-800 dark:tw-via-80%">
+      © 2023. Built with ❤️ by 
+      <a class="primary-link" href="https://github.com/inglkruiz" target="_blank" rel="noopener noreferrer">
+        @inglkruiz
+      </a>
+      using
+       
+      <a href="https://astro.build/" class="primary-link hover:tw-underline-offset-8">
+        🚀 Astro v2.4.5 🌙
+      </a>
+    </footer>
+  </body>
+</html>

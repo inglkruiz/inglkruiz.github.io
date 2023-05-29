@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing named exported recursive functions using Jest</title>
+    <meta name="description" content="Luis Carlos Ruiz Delgado. Proactive &#38; disciplined Senior Software Engineer with rock-solid programming skills in JavaScript/Typescript.">
+    <meta name="author" content="Luis C. Ruiz">
+    <meta name="generator" content="Astro v2.4.5">
+
+    <!-- <link rel="alternate" type="application/rss+xml" href="/rss.xml" /> -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico" /> -->
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/_astro/_...slug_.0a39b8d7.css" /><script type="module">const e=(()=>typeof localStorage<"u"&&localStorage.getItem("theme")?localStorage.getItem("theme")??"tw-dark":window.matchMedia("(prefers-color-scheme: dark)").matches?"tw-dark":"tw-light")();e==="tw-light"?document.documentElement.classList.remove("tw-dark"):document.documentElement.classList.add("tw-dark");window.localStorage.setItem("theme",e);
+</script></head>
+  <body class="tw-container tw-mx-auto tw-min-h-screen tw-text-gray-600 dark:tw-bg-neutral-800 dark:tw-text-gray-300 tw-pt-8">
+    <header>
+    <h3>
+      <a href="/" class="tw-text-lg tw-font-semibold tw-text-neutral-100">
+        WhateverJS Blog
+      </a>
+    </h3>
+  </header>
+
+    <main class="tw-pb-20">
+      <article class="tw-prose tw-max-w-3xl tw-mx-auto">
+    <header id="postHeader" class="tw-sticky tw-top-0">
+      <div class="tw-pt-4 dark:tw-bg-neutral-800">
+        <h1 id="postTite" class="tw-text-2xl tw-font-semibold tw-mb-1">
+          Testing named exported recursive functions using Jest
+        </h1>
+        <small>
+          November 18, 2020
+        </small> - 7 min read
+      </div>
+      <div class="tw-h-6 dark:tw-bg-gradient-to-b dark:tw-from-neutral-800">
+      </div>
+    </header>
+    
+<a class="primary-link" href="/posts/apprentices-will-not-understand-typescript">
+      ← Apprentices won&#39;t understand Typescript, I heard
+    </a>
+    <hr>
+
+    <p>I’m starting to love Unit Testing, this old good practice adds so much value to any long-term product that I feel it should be mandatory in any software development team. I’ve realized that it increases your confidence as a software developer and helps your teammates to feel more comfortable when they review code because you are showing them what test cases you automated. And, I’m quite sure you will thank yourself in the future whenever you need or want to refactor some code.</p>
+<p>In this post I will show you a functional approach for testing named exported recursive functions using Jest.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ol>
+<li>Have a good understanding about recursive functions, and how to code them.</li>
+<li>Might come handy to read what <a href="https://v2.parceljs.org/" rel="noopener" target="_blank">Jest</a> does, how <a href="https://jestjs.io/docs/en/jest-object#jestspyonobject-methodname" rel="noopener" target="_blank">.spyOn</a> and <a href="https://jestjs.io/docs/en/jest-object#jestfnimplementation" rel="noopener" target="_blank">.fn</a> methods work.</li>
+</ol>
+<h3 id="lets-do-it">Let’s Do It</h3>
+<p>I’m going to present you a real case scenario I faced weeks ago where a request to an API to fetch geographic locations returned a geographic tree. For the sake of simplicity, I’m going to describe a small portion of the response.</p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">1</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Belgium</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">3</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">children</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span></span>
+<span class="line"><span style="color:#F8F8F2">    {</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">2</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Brussels</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">2</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">children</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span></span>
+<span class="line"><span style="color:#F8F8F2">        {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">3</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Ixelles/Elsene</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">1</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">        },</span></span>
+<span class="line"><span style="color:#F8F8F2">        {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">4</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Anderlecht</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">1</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">        },</span></span>
+<span class="line"><span style="color:#F8F8F2">        {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">8</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Jette</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">1</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">        }</span></span>
+<span class="line"><span style="color:#F8F8F2">      ]</span></span>
+<span class="line"><span style="color:#F8F8F2">    },</span></span>
+<span class="line"><span style="color:#F8F8F2">    {</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">5</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Antwerpen</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">2</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">children</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span></span>
+<span class="line"><span style="color:#F8F8F2">        {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">6</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Geel</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">1</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">        },</span></span>
+<span class="line"><span style="color:#F8F8F2">        {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">7</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Mechelen</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">1</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">        },</span></span>
+<span class="line"><span style="color:#F8F8F2">        {</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">id</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">9</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Sint-Katelijne-Waver</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">          </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">level</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">1</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">        }</span></span>
+<span class="line"><span style="color:#F8F8F2">      ]</span></span>
+<span class="line"><span style="color:#F8F8F2">    }</span></span>
+<span class="line"><span style="color:#F8F8F2">  ]</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>The response in this case is 3 levels depth. Although the example seems to be simple this could scale to deeper levels, and the data structure could become expensive to manipulate/query/handle if you want to get the very last and deepest level location.</p>
+<p>Imagine for example,</p>
+<ol>
+<li>you need to present this geographical tree as a list where each item has the location’s <code>name</code> and its immediate parent’s <code>name</code>.</li>
+<li>you need to search a location by its name while the user types in an input, and show the matching results inside an autocomplete options list.</li>
+<li>you need to build a breadcrumb if the user picks/selects a location. An array where the last element is what the user has selected and the first is the root location (in this case Belgium).</li>
+</ol>
+<blockquote>
+<p>What would be the first thing to do?</p>
+</blockquote>
+<p>Well, from my perspective you will need a lookup table. It could be a <code>Map</code> or an <code>Object</code> where keys are the location ids and values are the locations as such.</p>
+<p>I’m going to show you the solution I implemented.</p>
+<p><strong>1st</strong>, I described the API’s request response using a Typescript interface:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#6272A4">// Describes the API&#39;s response</span></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">interface</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTree</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  id</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">number</span></span>
+<span class="line"><span style="color:#F8F8F2">  name</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">string</span></span>
+<span class="line"><span style="color:#F8F8F2">  level</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">number</span></span>
+<span class="line"><span style="color:#F8F8F2">  children</span><span style="color:#FF79C6">?:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTree</span><span style="color:#F8F8F2">[]</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p><strong>2nd</strong>, I implemented a recursive function that takes the geographical tree as 1st parameter and an instance of a <code>Map</code> (optional) as 2nd parameter.</p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#6272A4">// Typescript types</span></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">interface</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt; {</span></span>
+<span class="line"><span style="color:#F8F8F2">  id</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">number</span></span>
+<span class="line"><span style="color:#F8F8F2">  children</span><span style="color:#FF79C6">?:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">T</span><span style="color:#F8F8F2">[]</span></span>
+<span class="line"><span style="color:#F8F8F2">  parentId</span><span style="color:#FF79C6">?:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">number</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">type</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt; </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">Map</span><span style="color:#F8F8F2">&lt;</span><span style="color:#8BE9FD;font-style:italic">number</span><span style="color:#F8F8F2">, </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">function</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt;(</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">geoTreeNode</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">T</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">geoMap</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt; </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6;font-weight:bold">new</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">Map</span><span style="color:#F8F8F2">&lt;</span><span style="color:#8BE9FD;font-style:italic">number</span><span style="color:#F8F8F2">, </span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;()</span></span>
+<span class="line"><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt; {</span></span>
+<span class="line"><span style="color:#F8F8F2">  geoMap.</span><span style="color:#50FA7B">set</span><span style="color:#F8F8F2">(geoTreeNode.id, geoTreeNode)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (geoTreeNode.children) {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">for</span><span style="color:#F8F8F2"> (</span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> child </span><span style="color:#FF79C6">of</span><span style="color:#F8F8F2"> geoTreeNode.children) {</span></span>
+<span class="line"><span style="color:#F8F8F2">      child.parentId </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> geoTreeNode.id</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#50FA7B">geoTreeToGeoMap</span><span style="color:#F8F8F2">(child, geoMap)</span></span>
+<span class="line"><span style="color:#F8F8F2">    }</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> geoMap</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>Quite simple solution, no? Now, in order test the <code>geoTreeToGeoMap</code> function I imported it into a <code>spec</code> file.</p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#50FA7B">describe</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">geoTreeToGeoMap</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">, () </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">it</span><span style="color:#F8F8F2">(</span><span style="color:#F1FA8C">`should not add &quot;parentId to root location&quot;`</span><span style="color:#F8F8F2">, () </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#6272A4">// geoTree is the object described in the beginning</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> geoMap </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMap</span><span style="color:#F8F8F2">(geoTree)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(geoMap.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">).parentId).</span><span style="color:#50FA7B">toBeUndefined</span><span style="color:#F8F8F2">()</span></span>
+<span class="line"><span style="color:#F8F8F2">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">it</span><span style="color:#F8F8F2">(</span><span style="color:#F1FA8C">`should add &quot;parentId to each location&#39;s child&quot;`</span><span style="color:#F8F8F2">, () </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> geoMap </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMap</span><span style="color:#F8F8F2">(geoTree)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(geoMap.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">2</span><span style="color:#F8F8F2">).parentId).</span><span style="color:#50FA7B">toBe</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(geoMap.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">3</span><span style="color:#F8F8F2">).parentId).</span><span style="color:#50FA7B">toBe</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">2</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(geoMap.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">5</span><span style="color:#F8F8F2">).parentId).</span><span style="color:#50FA7B">toBe</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(geoMap.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">6</span><span style="color:#F8F8F2">).parentId).</span><span style="color:#50FA7B">toBe</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">5</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"><span style="color:#F8F8F2">  })</span></span>
+<span class="line"><span style="color:#F8F8F2">})</span></span></code></pre>
+<p>No big deal, so far.</p>
+<p>After testing the function’s results I decided to make assertions on how many times the function was being called. I thought that using <code>jest.fn</code> to wrap the original implementation and use it afterwards was the way to do it.</p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#50FA7B">describe</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">geoTreeToGeoMap</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">, () </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">afterAll</span><span style="color:#F8F8F2">(() </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    jest.</span><span style="color:#50FA7B">clearAllMocks</span><span style="color:#F8F8F2">()</span></span>
+<span class="line"><span style="color:#F8F8F2">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">it</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">should be called expected times</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">, () </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> mockFn </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> jest.</span><span style="color:#50FA7B">fn</span><span style="color:#F8F8F2">(geoTreeToGeoMap)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> geoMap </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">mockFn</span><span style="color:#F8F8F2">(geoTree)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(geoMap.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">)).</span><span style="color:#50FA7B">toStrictEqual</span><span style="color:#F8F8F2">(geoTree)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(mockFn).</span><span style="color:#50FA7B">toHaveBeenCalledTimes</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">9</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"><span style="color:#F8F8F2">  })</span></span>
+<span class="line"><span style="color:#F8F8F2">})</span></span></code></pre>
+<p>Unfortunately, the test could only track the first function’s call.</p>
+<p><img src="/content/posts/testing-exported-functions-using-jest/recursive-function-test-failed.png" alt="Recursive function test failed"/></p>
+<p>The reason WHY is failing doesn’t point to Jest but to how named exported functions are transpiled to Javascript.</p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">use strict</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">Object.</span><span style="color:#50FA7B">defineProperty</span><span style="color:#F8F8F2">(</span><span style="color:#8BE9FD;font-style:italic">exports</span><span style="color:#F8F8F2">, </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">__esModule</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">, {</span></span>
+<span class="line"><span style="color:#F8F8F2">  value</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#BD93F9">true</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">})</span></span>
+<span class="line"><span style="color:#8BE9FD;font-style:italic">exports</span><span style="color:#F8F8F2">.geoTreeToGeoMap </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> geoTreeToGeoMap</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">function</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMap</span><span style="color:#F8F8F2">(</span><span style="color:#FFB86C;font-style:italic">geoTreeNode</span><span style="color:#F8F8F2">, </span><span style="color:#FFB86C;font-style:italic">geoMap</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6;font-weight:bold">new</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">Map</span><span style="color:#F8F8F2">()) {</span></span>
+<span class="line"><span style="color:#F8F8F2">  geoMap.</span><span style="color:#50FA7B">set</span><span style="color:#F8F8F2">(geoTreeNode.id, geoTreeNode)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (geoTreeNode.children) {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">for</span><span style="color:#F8F8F2"> (</span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> child </span><span style="color:#FF79C6">of</span><span style="color:#F8F8F2"> geoTreeNode.children) {</span></span>
+<span class="line"><span style="color:#F8F8F2">      child.parentId </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> geoTreeNode.id</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#50FA7B">geoTreeToGeoMap</span><span style="color:#F8F8F2">(child, geoMap)</span></span>
+<span class="line"><span style="color:#F8F8F2">    }</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> geoMap</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>After linking both parts, I understood that spying an exported function that calls itself directly doesn’t reach the function used inside the function’s body because it points to a different memory reference.</p>
+<p>To solve this I could take one of the following solutions:</p>
+<ol>
+<li>declaring an object, assign the function to one of its properties, and use the object’s property reference inside the recursive function, or</li>
+<li>importing the recursive function back into its own module and use the imported function inside itself.</li>
+</ol>
+<p>Both solutions are well described in this <a href="https://stackoverflow.com/questions/45102677/testing-recursive-calls-in-jest" rel="noopener" target="_blank">Stack Overflow question #45102677</a>.</p>
+<p>However, I find both solutions had caveats, here are my explanations.</p>
+<ol>
+<li>The first solution doesn’t play well in a front-end application because export default objects aren’t tree shakable AFAIK.</li>
+<li>The second solution produces to my taste a not pleasant code smell. It could be hard to understand WHY a module is importing into itself.</li>
+</ol>
+<p>Now, here is my solution.</p>
+<p>From a Functional Programming perspective the recursive function could be re-written to accept 3 parameters, being the 1st parameter the function used inside the function’s body. Then, a Factory function could be created to bind to the 1st parameter the same recursive function which produces a new function.</p>
+<p>The implementation using a Functional Programming approach is as follows:</p>
+<p><code>geoTreeToGeoMap.types.ts</code></p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">interface</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt; {</span></span>
+<span class="line"><span style="color:#F8F8F2">  id</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">number</span></span>
+<span class="line"><span style="color:#F8F8F2">  children</span><span style="color:#FF79C6">?:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">T</span><span style="color:#F8F8F2">[]</span></span>
+<span class="line"><span style="color:#F8F8F2">  parentId</span><span style="color:#FF79C6">?:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">number</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">type</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt; </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">Map</span><span style="color:#F8F8F2">&lt;</span><span style="color:#8BE9FD;font-style:italic">number</span><span style="color:#F8F8F2">, </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">type</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTreeToGeoMapRecursive</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt; </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> (</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">self</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTreeToGeoMapRecursive</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">geoTreeNode</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">T</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">geoMap</span><span style="color:#FF79C6">?:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">type</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTreeToGeoMap</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> &lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt;(</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">geoTreeNode</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">T</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">geoMap</span><span style="color:#FF79C6">?:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">&amp;</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt;</span></span></code></pre>
+<p><code>geoTreeToGeoMap.ts</code></p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#FF79C6">import</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  GeoMap,</span></span>
+<span class="line"><span style="color:#F8F8F2">  GeoMapElement,</span></span>
+<span class="line"><span style="color:#F8F8F2">  GeoTreeToGeoMapRecursive,</span></span>
+<span class="line"><span style="color:#F8F8F2">} </span><span style="color:#FF79C6">from</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">./geoTreeToGeoMap.types</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">function</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMapRecursive</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt;(</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">self</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTreeToGeoMapRecursive</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">geoTreeNode</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">T</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">geoMap</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt; </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6;font-weight:bold">new</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">Map</span><span style="color:#F8F8F2">&lt;</span><span style="color:#8BE9FD;font-style:italic">number</span><span style="color:#F8F8F2">, </span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;()</span></span>
+<span class="line"><span style="color:#F8F8F2">)</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoMap</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt; {</span></span>
+<span class="line"><span style="color:#F8F8F2">  geoMap.</span><span style="color:#50FA7B">set</span><span style="color:#F8F8F2">(geoTreeNode.id, geoTreeNode)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">if</span><span style="color:#F8F8F2"> (geoTreeNode.children) {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">for</span><span style="color:#F8F8F2"> (</span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> child </span><span style="color:#FF79C6">of</span><span style="color:#F8F8F2"> geoTreeNode.children) {</span></span>
+<span class="line"><span style="color:#F8F8F2">      child.parentId </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> geoTreeNode.id</span></span>
+<span class="line"><span style="color:#F8F8F2">      </span><span style="color:#50FA7B">self</span><span style="color:#F8F8F2">(self, child, geoMap)</span></span>
+<span class="line"><span style="color:#F8F8F2">    }</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FF79C6">return</span><span style="color:#F8F8F2"> geoMap</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMapFactory</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> &lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">extends</span><span style="color:#F8F8F2"> </span><span style="color:#FFB86C;font-style:italic">GeoMapElement</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;&gt;(</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#FFB86C;font-style:italic">recursiveFn</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTreeToGeoMapRecursive</span><span style="color:#F8F8F2">&lt;</span><span style="color:#FFB86C;font-style:italic">T</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">) </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> recursiveFn.</span><span style="color:#50FA7B">bind</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">null</span><span style="color:#F8F8F2">, recursiveFn)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF79C6">export</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> geoTreeToGeoMap</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTreeToGeoMap</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMapFactory</span><span style="color:#F8F8F2">(</span></span>
+<span class="line"><span style="color:#F8F8F2">  geoTreeToGeoMapRecursive</span></span>
+<span class="line"><span style="color:#F8F8F2">)</span></span></code></pre>
+<p>Then, in the <code>spec</code> file, the recursive function is wrapped with a jest mock using <code>jest.fn</code> and the Factory function uses the mock to produce the <code>geoTreeToGeoMap</code>.</p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#50FA7B">describe</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">function execution</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">, () </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">afterAll</span><span style="color:#F8F8F2">(() </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    jest.</span><span style="color:#50FA7B">clearAllMocks</span><span style="color:#F8F8F2">()</span></span>
+<span class="line"><span style="color:#F8F8F2">  })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B">it</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">should be called expected times</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">, () </span><span style="color:#FF79C6">=&gt;</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#6272A4">// Wrap the recursive implementation with a Spy to keep track of it recursive calls</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> geoTreeToGeoMapRecursiveSpy </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> jest.</span><span style="color:#50FA7B">fn</span><span style="color:#F8F8F2">(geoTreeToGeoMapRecursive)</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> geoTreeToGeoMap</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#8BE9FD;font-style:italic">GeoTreeToGeoMap</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMapFactory</span><span style="color:#F8F8F2">(</span></span>
+<span class="line"><span style="color:#F8F8F2">      geoTreeToGeoMapRecursiveSpy</span></span>
+<span class="line"><span style="color:#F8F8F2">    )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#FF79C6">const</span><span style="color:#F8F8F2"> geoMap </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B">geoTreeToGeoMap</span><span style="color:#F8F8F2">(geoTree)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(geoMap.</span><span style="color:#50FA7B">get</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">1</span><span style="color:#F8F8F2">)).</span><span style="color:#50FA7B">toStrictEqual</span><span style="color:#F8F8F2">(geoTree)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#50FA7B">expect</span><span style="color:#F8F8F2">(geoTreeToGeoMapRecursiveSpy).</span><span style="color:#50FA7B">toHaveBeenCalledTimes</span><span style="color:#F8F8F2">(</span><span style="color:#BD93F9">9</span><span style="color:#F8F8F2">)</span></span>
+<span class="line"><span style="color:#F8F8F2">  })</span></span>
+<span class="line"><span style="color:#F8F8F2">})</span></span></code></pre>
+<p>This way the function <code>geoTreeToGeoMapRecursiveSpy</code> can be used to make call’s assertions, and the tests passed.</p>
+<blockquote>
+<p>I hope you liked it.</p>
+</blockquote>
+
+    <footer>
+      
+<a class="primary-link" href="/posts/apprentices-will-not-understand-typescript">
+      ← Apprentices won&#39;t understand Typescript, I heard
+    </a>
+      <hr>
+      <p>
+  Written by <strong>Luis C. Ruiz</strong>. A proactive and disciplined
+  Sr. Software Engineer with rock-solid programming skills in
+  Javascript/Typescript.
+</p>
+<p class="tw-text-right">
+  <a class="primary-link" href="https://www.linkedin.com/in/inglkruiz" target="_blank" rel="noopener noreferrer">
+    Read more about me on LinkedIn.
+  </a>
+</p>
+    </footer>
+  </article>
+    </main>
+
+    <footer class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-10 tw-pb-4 tw-w-full dark:tw-bg-gradient-to-t dark:tw-from-neutral-800 dark:tw-via-neutral-800 dark:tw-via-80%">
+      © 2023. Built with ❤️ by 
+      <a class="primary-link" href="https://github.com/inglkruiz" target="_blank" rel="noopener noreferrer">
+        @inglkruiz
+      </a>
+      using
+       
+      <a href="https://astro.build/" class="primary-link hover:tw-underline-offset-8">
+        🚀 Astro v2.4.5 🌙
+      </a>
+    </footer>
+  </body>
+</html>

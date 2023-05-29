@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TemplateRef projection with Context in an Angular Component</title>
+    <meta name="description" content="Luis Carlos Ruiz Delgado. Proactive &#38; disciplined Senior Software Engineer with rock-solid programming skills in JavaScript/Typescript.">
+    <meta name="author" content="Luis C. Ruiz">
+    <meta name="generator" content="Astro v2.4.5">
+
+    <!-- <link rel="alternate" type="application/rss+xml" href="/rss.xml" /> -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico" /> -->
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/_astro/_...slug_.0a39b8d7.css" /><script type="module">const e=(()=>typeof localStorage<"u"&&localStorage.getItem("theme")?localStorage.getItem("theme")??"tw-dark":window.matchMedia("(prefers-color-scheme: dark)").matches?"tw-dark":"tw-light")();e==="tw-light"?document.documentElement.classList.remove("tw-dark"):document.documentElement.classList.add("tw-dark");window.localStorage.setItem("theme",e);
+</script></head>
+  <body class="tw-container tw-mx-auto tw-min-h-screen tw-text-gray-600 dark:tw-bg-neutral-800 dark:tw-text-gray-300 tw-pt-8">
+    <header>
+    <h3>
+      <a href="/" class="tw-text-lg tw-font-semibold tw-text-neutral-100">
+        WhateverJS Blog
+      </a>
+    </h3>
+  </header>
+
+    <main class="tw-pb-20">
+      <article class="tw-prose tw-max-w-3xl tw-mx-auto">
+    <header id="postHeader" class="tw-sticky tw-top-0">
+      <div class="tw-pt-4 dark:tw-bg-neutral-800">
+        <h1 id="postTite" class="tw-text-2xl tw-font-semibold tw-mb-1">
+          TemplateRef projection with Context in an Angular Component
+        </h1>
+        <small>
+          January 12, 2020
+        </small> - 3 min read
+      </div>
+      <div class="tw-h-6 dark:tw-bg-gradient-to-b dark:tw-from-neutral-800">
+      </div>
+    </header>
+    <div class="tw-text-right tw-mb-3">
+      <a class="primary-link" href="/posts/apprentices-will-not-understand-typescript">
+        Apprentices won&#39;t understand Typescript, I heard →
+      </a>
+    </div>
+<a class="primary-link" href="/posts/angular-material-reusable-autocomplete">
+      ← Reusable Angular Material Input Autocomplete form control
+    </a>
+    <hr>
+
+    <p>In a <a href="/angular-material-reusable-autocomplete/">previous post</a>, I wrote a reusable Component which uses an Angular Material Autocomplete and an Input. In this component, when the user types at least 3 characters (by default) a search is triggered to retrieve some options (options where their labels match the typed text), the options displayed are force to fit the option’s layout I wrote in the component. I found interesting the idea of using an embedded template to render a custom layout that uses other option’s attributes (not only the label text).</p>
+<blockquote>
+<p>Basically, the benefits of this is to provide a way of customizing the option’s layout displayed by the Autocomplete Component which can be translated as better UX.</p>
+</blockquote>
+<p>Before starting I will ask you to open the following link &gt; <a href="https://stackblitz.com/edit/angular-sbcm7h-emqpgf">Stackblitz - Reusable Angular Material Input Autocomplete form control with custom Option’s layout</a> where you will find the working example. Along this post I will describe briefly the approach I took and my reasoning about some decisions.</p>
+<h2 id="user-story">User Story</h2>
+<p>As User
+When I search X product by its name
+I want to see other attributes regarding to the product.</p>
+<blockquote>
+<p>Consider that the User story I wrote is very very generic, this is just an example.</p>
+</blockquote>
+<h2 id="developers-decisions">Developer’s decisions</h2>
+<ol>
+<li>The template to be consumed can be passed as a component’s parameter but also can be capture from its content when is being used. I will take the later approach since I feel it is less confusing for developers, as a developer when I see that an element is written as projected content inside a component I expect it to be used only inside of it.</li>
+</ol>
+<h4 id="option-1">Option 1</h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">#myTemplate</span><span style="color:#F8F8F2">&gt; &lt;/</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">component-a</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">[optionTemplate]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">myTemplate</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt; &lt;/</span><span style="color:#FF79C6">component-a</span><span style="color:#F8F8F2">&gt;</span></span></code></pre>
+<h4 id="option-2">Option 2</h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">component-a</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2">&gt; &lt;/</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;/</span><span style="color:#FF79C6">component-a</span><span style="color:#F8F8F2">&gt;</span></span></code></pre>
+<h2 id="prerequisites">Prerequisites</h2>
+<ol>
+<li>Might come handy to have read the <a href="/angular-material-reusable-autocomplete/">previous post</a>.</li>
+<li>Knowledge on <a href="https://angular.io/api/core/TemplateRef"><code>TemplateRef</code></a> and <a href="https://angular.io/api/core/ContentChild"><code>ContentChild</code></a>.</li>
+</ol>
+<h2 id="lets-do-it">Let’s Do It</h2>
+<p>Due to this post is based on a former post I will present only the small changes I did.</p>
+<h4 id="controller">Controller</h4>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="" style="--start: 59;"><span class="line"><span style="color: #6272A4">// Inner form control to link input text changes to mat autocomplete</span></span>
+<span class="line"><span style="color: #F8F8F2">inputControl </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #FF79C6; font-weight: bold">new</span><span style="color: #F8F8F2"> </span><span style="color: #50FA7B">FormControl</span><span style="color: #F8F8F2">(</span><span style="color: #E9F284">&#39;&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #BD93F9; font-style: italic">this</span><span style="color: #F8F8F2">.validators);</span></span>
+<span class="line"><span style="color: #F8F8F2">noResults </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">false</span><span style="color: #F8F8F2">;</span></span>
+<span class="line"><span style="color: #F8F8F2">isSearching </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">false</span><span style="color: #F8F8F2">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #F8F8F2">private _lengthToTriggerSearch </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">3</span><span style="color: #F8F8F2">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #F8F8F2">@</span><span style="color: #50FA7B">ContentChild</span><span style="color: #F8F8F2">(</span><span style="color: #50FA7B; font-style: italic">TemplateRef</span><span style="color: #F8F8F2">, { static</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">false</span><span style="color: #F8F8F2"> })</span></span>
+<span class="line"><span style="color: #F8F8F2">optionTemplate: TemplateRef</span><span style="color: #FF79C6">&lt;</span><span style="color: #F8F8F2">any</span><span style="color: #FF79C6">&gt;</span><span style="color: #F8F8F2">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color: #F8F8F2">@</span><span style="color: #50FA7B">Input</span><span style="color: #F8F8F2">()</span></span>
+<span class="line"><span style="color: #F8F8F2">set </span><span style="color: #50FA7B">lengthToTriggerSearch</span><span style="color: #F8F8F2">(value: number) {</span></span>
+<span class="line"><span style="color: #F8F8F2"> </span><span style="color: #BD93F9; font-style: italic">this</span><span style="color: #F8F8F2">._lengthToTriggerSearch </span><span style="color: #FF79C6">=</span><span style="color: #F8F8F2"> </span><span style="color: #50FA7B">coerceNumberProperty</span><span style="color: #F8F8F2">(value, </span><span style="color: #BD93F9">0</span><span style="color: #F8F8F2">);</span></span>
+<span class="line"><span style="color: #F8F8F2">}</span></span></code></pre>
+<ol>
+<li>On line <strong>66</strong> the component gets the <code>TemplateRef</code> declared inside its content.</li>
+</ol>
+<h4 id="template">Template</h4>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="" style="--start: 26;"><span class="line"><span style="color: #F8F8F2">&lt;</span><span style="color: #FF79C6">ng-template</span><span style="color: #F8F8F2"> </span><span style="color: #50FA7B; font-style: italic">#optionsTemplate</span><span style="color: #F8F8F2">&gt;</span></span>
+<span class="line"><span style="color: #F8F8F2">  &lt;</span><span style="color: #FF79C6">mat-option</span><span style="color: #F8F8F2"> </span><span style="color: #50FA7B; font-style: italic">*ngFor</span><span style="color: #FF79C6">=</span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">let option of options</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #50FA7B; font-style: italic">[value]</span><span style="color: #FF79C6">=</span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">option</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #50FA7B; font-style: italic">class</span><span style="color: #FF79C6">=</span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">provided</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2">&gt;</span></span>
+<span class="line"><span style="color: #F8F8F2">&lt;</span><span style="color: #FF79C6">ng-container</span><span style="color: #F8F8F2"> </span><span style="color: #50FA7B; font-style: italic">*ngIf</span><span style="color: #FF79C6">=</span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">optionTemplate</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2">&gt;</span></span>
+<span class="line"><span style="color: #F8F8F2">      &lt;</span><span style="color: #FF79C6">ng-container</span></span>
+<span class="line"><span style="color: #F8F8F2">        </span><span style="color: #50FA7B; font-style: italic">*ngTemplateOutlet</span><span style="color: #FF79C6">=</span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">optionTemplate; context: { option: option }</span><span style="color: #E9F284">&quot;</span></span>
+<span class="line"><span style="color: #F8F8F2">      &gt;</span></span>
+<span class="line"><span style="color: #F8F8F2">      &lt;/</span><span style="color: #FF79C6">ng-container</span><span style="color: #F8F8F2">&gt;</span></span>
+<span class="line"><span style="color: #F8F8F2">    &lt;/</span><span style="color: #FF79C6">ng-container</span><span style="color: #F8F8F2">&gt;</span></span>
+<span class="line"><span style="color: #F8F8F2">    &lt;</span><span style="color: #FF79C6">ng-container</span><span style="color: #F8F8F2"> </span><span style="color: #50FA7B; font-style: italic">*ngIf</span><span style="color: #FF79C6">=</span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">!optionTemplate</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2">&gt; {{ option.label }} &lt;/</span><span style="color: #FF79C6">ng-container</span><span style="color: #F8F8F2">&gt;</span></span>
+<span class="line"><span style="color: #F8F8F2">  &lt;/</span><span style="color: #FF79C6">mat-option</span><span style="color: #F8F8F2">&gt;</span></span>
+<span class="line"><span style="color: #F8F8F2">&lt;/</span><span style="color: #FF79C6">ng-template</span><span style="color: #F8F8F2">&gt;</span></span></code></pre>
+<ol>
+<li>On line <strong>28</strong> a conditional verifies if <code>optionTemplate</code> exists. If it exists then it is projected inside a container with a given context object using the directive <a href="https://angular.io/api/common/NgTemplateOutlet">NgTemplateOutlet
+</a>. The given context contains the option object.</li>
+<li>On line <strong>34</strong> there is still the default layout which addresses the case when the template is not present.</li>
+</ol>
+<h2 id="components-usage">Component’s Usage</h2>
+<p>The usage does not change much. As described before the template must be declared inside the component and by using the <code>let</code> declaration it has access to the context attached.</p>
+<h4 id="template-1">Template</h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">input-autocomplete</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">formControlName</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">pokemon</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">placeholder</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Pokemon&#39;s name</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">[options]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">pokemons$ | async</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">let-option</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">option</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">div</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">class</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">pokemon-option</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">      &lt;</span><span style="color:#FF79C6">img</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">[src]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">option.sprite</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> /&gt; {{ option.label }}</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;/</span><span style="color:#FF79C6">div</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;/</span><span style="color:#FF79C6">input-autocomplete</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">input-autocomplete</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">formControlName</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">swCharacter</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">placeholder</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">SW character&#39;s name</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">lengthToTriggerSearch</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">2</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#50FA7B;font-style:italic">[options]</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">swCharacters$ | async</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">let-option</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">option</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    {{ option.label }} ({{option.gender}})</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">ng-template</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;/</span><span style="color:#FF79C6">input-autocomplete</span><span style="color:#F8F8F2">&gt;</span></span></code></pre>
+<blockquote>
+<p>I hope you liked it.</p>
+</blockquote>
+
+    <footer>
+      <div class="tw-text-right tw-mb-3">
+      <a class="primary-link" href="/posts/apprentices-will-not-understand-typescript">
+        Apprentices won&#39;t understand Typescript, I heard →
+      </a>
+    </div>
+<a class="primary-link" href="/posts/angular-material-reusable-autocomplete">
+      ← Reusable Angular Material Input Autocomplete form control
+    </a>
+      <hr>
+      <p>
+  Written by <strong>Luis C. Ruiz</strong>. A proactive and disciplined
+  Sr. Software Engineer with rock-solid programming skills in
+  Javascript/Typescript.
+</p>
+<p class="tw-text-right">
+  <a class="primary-link" href="https://www.linkedin.com/in/inglkruiz" target="_blank" rel="noopener noreferrer">
+    Read more about me on LinkedIn.
+  </a>
+</p>
+    </footer>
+  </article>
+    </main>
+
+    <footer class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-10 tw-pb-4 tw-w-full dark:tw-bg-gradient-to-t dark:tw-from-neutral-800 dark:tw-via-neutral-800 dark:tw-via-80%">
+      © 2023. Built with ❤️ by 
+      <a class="primary-link" href="https://github.com/inglkruiz" target="_blank" rel="noopener noreferrer">
+        @inglkruiz
+      </a>
+      using
+       
+      <a href="https://astro.build/" class="primary-link hover:tw-underline-offset-8">
+        🚀 Astro v2.4.5 🌙
+      </a>
+    </footer>
+  </body>
+</html>

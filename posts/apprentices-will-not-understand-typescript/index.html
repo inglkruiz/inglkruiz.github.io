@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apprentices won&#39;t understand Typescript, I heard</title>
+    <meta name="description" content="Luis Carlos Ruiz Delgado. Proactive &#38; disciplined Senior Software Engineer with rock-solid programming skills in JavaScript/Typescript.">
+    <meta name="author" content="Luis C. Ruiz">
+    <meta name="generator" content="Astro v2.4.5">
+
+    <!-- <link rel="alternate" type="application/rss+xml" href="/rss.xml" /> -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico" /> -->
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/_astro/_...slug_.0a39b8d7.css" /><script type="module">const e=(()=>typeof localStorage<"u"&&localStorage.getItem("theme")?localStorage.getItem("theme")??"tw-dark":window.matchMedia("(prefers-color-scheme: dark)").matches?"tw-dark":"tw-light")();e==="tw-light"?document.documentElement.classList.remove("tw-dark"):document.documentElement.classList.add("tw-dark");window.localStorage.setItem("theme",e);
+</script></head>
+  <body class="tw-container tw-mx-auto tw-min-h-screen tw-text-gray-600 dark:tw-bg-neutral-800 dark:tw-text-gray-300 tw-pt-8">
+    <header>
+    <h3>
+      <a href="/" class="tw-text-lg tw-font-semibold tw-text-neutral-100">
+        WhateverJS Blog
+      </a>
+    </h3>
+  </header>
+
+    <main class="tw-pb-20">
+      <article class="tw-prose tw-max-w-3xl tw-mx-auto">
+    <header id="postHeader" class="tw-sticky tw-top-0">
+      <div class="tw-pt-4 dark:tw-bg-neutral-800">
+        <h1 id="postTite" class="tw-text-2xl tw-font-semibold tw-mb-1">
+          Apprentices won&#39;t understand Typescript, I heard
+        </h1>
+        <small>
+          October 04, 2020
+        </small> - 11 min read
+      </div>
+      <div class="tw-h-6 dark:tw-bg-gradient-to-b dark:tw-from-neutral-800">
+      </div>
+    </header>
+    <div class="tw-text-right tw-mb-3">
+      <a class="primary-link" href="/posts/testing-exported-functions-using-jest">
+        Testing named exported recursive functions using Jest →
+      </a>
+    </div>
+<a class="primary-link" href="/posts/templateref-projection-with-context-inside-component">
+      ← TemplateRef projection with Context in an Angular Component
+    </a>
+    <hr>
+
+    <p>Aha! So here you are to read my story and arguments favoring teaching Typescript instead of Javascript. Unfortunately for you, appreciated reader, this post doesn’t cover the pros and cons around that topic due to there are already plenty of articles on the internet. Instead, this post narrates my journey across how I set up a functional project to demonstrate that is not difficult to start coding Typescript for the Web. Although, before jumping on that track I will tell you why I suggest starting teaching Typescript is the way to go for new Web developers.</p>
+<p>Perhaps, the way I made my statement is somehow wrong. I’m going to rephrase what I suggested:</p>
+<blockquote>
+<p>“Let’s teach Javascript on a configured Typescript environment”.</p>
+</blockquote>
+<p>The idea behind the suggestion is to leverage Typescript’s inferring capabilities on types and let apprentices discover them. Day by day, lesson by lesson, apprentices will learn by themselves that something is supporting them on their long learning Javascript journey, and myself as a coach, I could show them little by little Typescript types and its benefits. From my point of view, this will pay off in the long-term because from the beginning Javascript’s bad parts are avoided. Moreover, companies will love to hired junior developers who already know Typescript.</p>
+<p>But hey, what about <a href="https://flow.org" rel="noopener" target="_blank">Flow</a>? In 2018 I configured a React project bundled with Webpack to include Flow and the result though it was good, the mere configuration task was tiring. In order to not discuss if Flow could be a good tool to learn, I will ask you to do yourself a favor, google it and search job descriptions where knowing Flow is a plus. I’m sure Typescript demand is already on track and by far is winning the poll.</p>
+<p>Now that you are back, you know I always like to start with a User Story, this time my user is an apprentice.</p>
+<h3 id="user-story">User Story</h3>
+<p>As Apprentice<br/>
+I want to code a Web project in an environment which provides me the following capabilities:</p>
+<ol>
+<li>I want to be able to develop Web pages using HTML, CSS, and Javascript.</li>
+<li>I want to be able to debug my code using browser’s Web developer tools.</li>
+</ol>
+<h3 id="prerequisites">Prerequisites</h3>
+<ol>
+<li>Might come handy to read what <a href="https://v2.parceljs.org/" rel="noopener" target="_blank">Parcel.js</a> does.</li>
+</ol>
+<h3 id="lets-do-it">Let’s Do It</h3>
+<p>Previously, I developed this idea (when it was first presented, <a href="https://github.com/inglkruiz/js-sdk/tree/1.0.0" rel="noopener" target="_blank">v1.0.0</a> using Parcel.js <code>v1.12.4</code> because as I mentioned before it was the beginning of the year 2020 and I wanted to deliver a functional project ASAP with stable dependencies (as of the time of this writing Parcel.js v2 is still in beta version). Now, nothing is pushing me to deliver fast and I had the idea of using the version <code>v2.0.0-beta.1</code>, what could go wrong? I like to experiment and enjoy the journey.</p>
+<p>First, let’s create a folder for the project and inside of it set up a new NPM package:</p>
+<p><em>Using the console/terminal:</em></p>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="no-line-numbers" style=""><span class="line"><span style="color: #50FA7B">$</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">mkdir</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">js-sdk</span><span style="color: #F8F8F2"> &amp;&amp; </span><span style="color: #8BE9FD">cd</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">./js-sdk</span><span style="color: #F8F8F2"> &amp;&amp; </span><span style="color: #50FA7B">npm</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">init</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">-y</span></span>
+<span class="line"></span></code></pre>
+<p>As a result you will end up inside the folder with a single file, the <code>package.json</code>:</p>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">name</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">js-sdk</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">version</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">1.0.0</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">description</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">main</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">index.js</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">scripts</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">test</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">echo </span><span style="color:#FF79C6">\&quot;</span><span style="color:#F1FA8C">Error: no test specified</span><span style="color:#FF79C6">\&quot;</span><span style="color:#F1FA8C"> &amp;&amp; exit 1</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  },</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">keywords</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [],</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">author</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">license</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">ISC</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>Now, let’s install <code>parcel</code> as a development dependency:</p>
+<p><em>Using the console/terminal:</em></p>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="no-line-numbers" style=""><span class="line"><span style="color: #50FA7B">$</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">npm</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">install</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">-D</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">parcel@next</span></span></code></pre>
+<p>And add two npm scripts (<code>start</code> and <code>build</code>) to the <code>package.json</code>:</p>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="" style="--start: 6;"><span class="line"><span style="color: #F8F8F2">{</span></span>
+<span class="line"><span style="color: #F8F8F2">  </span><span style="color: #8BE9FE">&quot;</span><span style="color: #8BE9FD">scripts</span><span style="color: #8BE9FE">&quot;</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> {</span></span>
+<span class="line"><span style="color: #F8F8F2">    </span><span style="color: #8BE9FE">&quot;</span><span style="color: #8BE9FD">start</span><span style="color: #8BE9FE">&quot;</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> </span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">parcel serve ./src/index.html</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2">,</span></span>
+<span class="line"><span style="color: #F8F8F2">    </span><span style="color: #8BE9FE">&quot;</span><span style="color: #8BE9FD">build</span><span style="color: #8BE9FE">&quot;</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> </span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">parcel build ./src/index.html</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2">,</span></span>
+<span class="line"><span style="color: #F8F8F2">    </span><span style="color: #8BE9FE">&quot;</span><span style="color: #8BE9FD">test</span><span style="color: #8BE9FE">&quot;</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> </span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">echo </span><span style="color: #FF79C6">\&quot;</span><span style="color: #F1FA8C">Error: no test specified</span><span style="color: #FF79C6">\&quot;</span><span style="color: #F1FA8C"> &amp;&amp; exit 1</span><span style="color: #E9F284">&quot;</span></span>
+<span class="line"><span style="color: #F8F8F2">  }</span></span>
+<span class="line"><span style="color: #F8F8F2">}</span></span></code></pre>
+<p>Next step is to create the folder (<code>src</code>) where apprentices will work and inside of it three files: <code>index.html</code>, <code>index.ts</code> and <code>styles.css</code>:</p>
+<h4 id="indexhtml"><code>index.html</code></h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">&lt;!</span><span style="color:#FF79C6">DOCTYPE</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">html</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;</span><span style="color:#FF79C6">html</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">head</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">title</span><span style="color:#F8F8F2">&gt;JS SDK&lt;/</span><span style="color:#FF79C6">title</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">meta</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">charset</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">utf-8</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> /&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">link</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">rel</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">stylesheet</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">type</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">text/css</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">href</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">styles.css</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2"> /&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">head</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;</span><span style="color:#FF79C6">body</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">h1</span><span style="color:#F8F8F2">&gt;Hello world!&lt;/</span><span style="color:#FF79C6">h1</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">    &lt;</span><span style="color:#FF79C6">script</span><span style="color:#F8F8F2"> </span><span style="color:#50FA7B;font-style:italic">src</span><span style="color:#FF79C6">=</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">index.ts</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">&gt;&lt;/</span><span style="color:#FF79C6">script</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">  &lt;/</span><span style="color:#FF79C6">body</span><span style="color:#F8F8F2">&gt;</span></span>
+<span class="line"><span style="color:#F8F8F2">&lt;/</span><span style="color:#FF79C6">html</span><span style="color:#F8F8F2">&gt;</span></span></code></pre>
+<h4 id="indexts"><code>index.ts</code></h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">console.</span><span style="color:#50FA7B">log</span><span style="color:#F8F8F2">(</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">Hello world!</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">)</span></span></code></pre>
+<p>With this setup Parcel works like a charm, apprentices can run <code>npm start</code> and open the URL <a href="http://localhost:1234/" rel="noopener" target="_blank"><a href="http://localhost:1234">http://localhost:1234</a></a> (this is where Parcel serves JS, HTML, CSS files and any other assets of the project).</p>
+<p><em>Note that I didn’t describe the <code>css</code> file content because it’s worthless for the purpose of this post.</em></p>
+<p>For our surprise, we have completed the User story. Let’s review the two items mentioned previously:</p>
+<ul>
+<li>I want to be able to develop Web pages using HTML, CSS, and Javascript.</li>
+</ul>
+<p>In addition, apprentices can start coding examples or exercises and Typescript’s inference system will help them to avoid errors like assigning a different type value to a <code>number</code> variable.<br/>
+<em>These capabilities are provided not by Parcel but by <a href="https://code.visualstudio.com" rel="noopener" target="_blank">Visual Studio Code</a>, the IDE I recommend for Web development.</em></p>
+<p><img src="/content/posts/apprentices-will-not-understand-typescript/typescript-error-assign-string-to-number.png" alt="Typescript error assign string to number"/></p>
+<p>However, if apprentices save the previous code ignoring Typescript’s errors Parcel will compile the code to Javascript with no errors because, although Typescript works out of the box with Parcel it merely strips out the type annotations.</p>
+<blockquote>
+<p>Perhaps we can improve this later but for now let’s leave him learn from his own errors on runtime.</p>
+</blockquote>
+<ul>
+<li>I want to be able to debug my code using browser’s Web developer tools.</li>
+</ul>
+<p>If apprentices open browser’s Web developer tools (in Google Chrome <code>Cmd + Opt + I</code>) and navigate to sources tab, they will be able to debug code as it was written.</p>
+<p><img src="/content/posts/apprentices-will-not-understand-typescript/google-chrome-debugging-typescript.png" alt="Google chrome debugging typescript"/></p>
+<h3 id="bonus">Bonus</h3>
+<p>In software development one of the most important things is <strong>feedback</strong>. When I’m coaching and give exercises to my apprentices I like they have unit tests running whilst they learn to code, I think that unit tests gives them a better feeling of achievement.</p>
+<p>Now, I’m switching to a new User perspective, mine perspective, the coach’s perspective. And again a User Story comes to my mind:</p>
+<h3 id="user-story-1">User Story</h3>
+<p>As Coach<br/>
+I want to be able to cover examples and exercises code with unit tests. Apprentices should be able to execute a command to run tests while developing.</p>
+<h3 id="lets-do-it-part-2">Let’s Do It (part 2)</h3>
+<p>Before starting, I have to admit that I thought achieving this would be straightforward but I hit a couple of walls.</p>
+<p>I started by choosing <a href="https://jestjs.io/en/" rel="noopener" target="_blank">Jest Testing Framework</a>, so I installed it and its Typescript types:</p>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="no-line-numbers" style=""><span class="line"><span style="color: #50FA7B">$</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">npm</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">install</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">-D</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">jest</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">@types/jest</span></span></code></pre>
+<p>And generated an initial Jest configuration file using <code>jest-cli</code>:</p>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="no-line-numbers" style=""><span class="line"><span style="color: #50FA7B">$</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">npx</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">jest</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">--init</span></span>
+<span class="line"></span></code></pre>
+<p>This commands will ask few questions where you have to answer Y/N or choose a provided option. Here is a capture of my answers:</p>
+<p><img src="/content/posts/apprentices-will-not-understand-typescript/jest-init-answers.png" alt="Jest init answers"/></p>
+<p>It generates a <code>jest.config.js</code> file with a short description for each option. Note I chose to use Jest when running “test” script AKA <code>npm test</code> but I modified it to run and watch for changes:</p>
+<h4 id="packagejson"><code>package.json</code></h4>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="" style="--start: 10;"><span class="line"><span style="color: #F8F8F2">{</span></span>
+<span class="line"><span style="color: #F8F8F2">  </span><span style="color: #8BE9FE">&quot;</span><span style="color: #8BE9FD">scripts</span><span style="color: #8BE9FE">&quot;</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> {</span></span>
+<span class="line"><span style="color: #F8F8F2">    </span><span style="color: #8BE9FE">&quot;</span><span style="color: #8BE9FD">start</span><span style="color: #8BE9FE">&quot;</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> </span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">parcel serve ./src/index.html</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2">,</span></span>
+<span class="line"><span style="color: #F8F8F2">    </span><span style="color: #8BE9FE">&quot;</span><span style="color: #8BE9FD">build</span><span style="color: #8BE9FE">&quot;</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> </span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">parcel build ./src/index.html</span><span style="color: #E9F284">&quot;</span><span style="color: #F8F8F2">,</span></span>
+<span class="line"><span style="color: #F8F8F2">    </span><span style="color: #8BE9FE">&quot;</span><span style="color: #8BE9FD">test</span><span style="color: #8BE9FE">&quot;</span><span style="color: #FF79C6">:</span><span style="color: #F8F8F2"> </span><span style="color: #E9F284">&quot;</span><span style="color: #F1FA8C">jest --watch</span><span style="color: #E9F284">&quot;</span></span>
+<span class="line"><span style="color: #F8F8F2">  }</span></span>
+<span class="line"><span style="color: #F8F8F2">}</span></span></code></pre>
+<p>Now, here is where I started to scratch my head because, although I had done this before using Parcel v1 I think I didn’t test it properly (I remember it took me 2 hours to build and document it).</p>
+<p>The thing is that Jest doesn’t compile Typescript to Javascript, it is merely a test runner. Therefore, we need to preprocess Typescript files before running them on Jest. For this, we have 3 possible configurations:</p>
+<ol>
+<li>Use <a href="https://github.com/azz/jest-runner-tsc" rel="noopener" target="_blank">jest-runner-tsc</a>.</li>
+<li>Use <a href="https://kulshekhar.github.io/ts-jest/" rel="noopener" target="_blank">ts-jest</a>.</li>
+<li>Use <a href="https://babeljs.io/" rel="noopener" target="_blank">Babel</a>.</li>
+</ol>
+<p>So, I started to evaluate my options.</p>
+<h4 id="jest-runner-tsc">jest-runner-tsc</h4>
+<p>I noticed that the project had 15 commits (as of the time of this writing) and the latest was on October the 16th, 2019. It was better to discard it.</p>
+<h4 id="ts-jest">ts-jest</h4>
+<p>I started to configure it in the project due to the tool claims to beat the limitations I would get if I use Babel. Here an extract from its documentation:</p>
+<p><em>“While @babel/preset-typescript is a great preset, you must know the limitation of it. Here is what is possible with TypeScript (and ts-jest), which is not with Babel7 and @babel/preset-typescript:<br/><br/>No type-checking: This is the big PRO of using TypeScript vs Babel, you have type-checking out of the box.”</em></p>
+<p>Nevertheless, its Github issues revealed that indeed they have limitations with typescript and performance. Leaving aside performance because for me it was not an issue, I did find problematic using Typescript in test files because Typescript errors were being caught only when Jest run the tests for the first time (on subsequent runs Typescript errors were ignored), an unfortunate situation for me or for apprentices if I give them unit tests to fix. This is a reported issue <a href="https://github.com/kulshekhar/ts-jest/issues/943" rel="noopener" target="_blank">#943</a>.</p>
+<p>I decided to park the idea and give Babel a try.</p>
+<h4 id="babel">Babel</h4>
+<p>To add Babel configuration to Jest I had to:</p>
+<ol>
+<li>Install Babel core, its preset for Typescript which strips out Typescript types, and Typescript as development dependency:</li>
+</ol>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="no-line-numbers" style=""><span class="line"><span style="color: #50FA7B">$</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">npm</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">install</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">-D</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">@babel/core</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">@babel/preset-env</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">@babel/preset-typescript</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">babel-jest</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">typescript</span></span>
+<span class="line"></span></code></pre>
+<ol start="2">
+<li>And, create a <code>babel.config.js</code> file:</li>
+</ol>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#8BE9FD;font-style:italic">module</span><span style="color:#F8F8F2">.</span><span style="color:#8BE9FD;font-style:italic">exports</span><span style="color:#F8F8F2"> </span><span style="color:#FF79C6">=</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">  presets</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> [</span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@babel/preset-env</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">, </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">@babel/preset-typescript</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">],</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>Jest will use Babel configuration thanks to its default configuration value <a href="https://jestjs.io/docs/en/configuration#transform-objectstring-pathtotransformer--pathtotransformer-object"><code>transform</code></a> and therefore will be able to run <code>.ts</code> files. However, this configuration won’t validate Typescript types.</p>
+<p>At this point, I thought I was going down the rabbit hole because I had not achieved what I wanted and I had read many configurations and documents, all the hassle just to build a boilerplate project for apprentices. With some hope I decided to finish what I had envisioned and adopted a pragmatic approach.</p>
+<p>I realized that I could run Typescript compiler without emitting types and watch for file changes using the command:</p>
+<pre class="astro-code dracula" style="background-color: #282A36; overflow-x: auto;"" tabindex="0"><code class="no-line-numbers" style=""><span class="line"><span style="color: #50FA7B">$</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">npx</span><span style="color: #F8F8F2"> </span><span style="color: #F1FA8C">tsc</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">--noEmit</span><span style="color: #F8F8F2"> </span><span style="color: #BD93F9">--watch</span></span>
+<span class="line"></span></code></pre>
+<p>Then I thought it was OK to have three scripts to run a development environment:</p>
+<h4 id="packagejson-1"><code>package.json</code></h4>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">scripts</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">start</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">parcel serve ./src/index.html</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">build</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">parcel build ./src/index.html</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">type-check:watch</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">tsc --noEmit --watch</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">test</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">jest --watch</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>But, after reflecting a bit I thought it was not what I would expect from a boilerplate project. I mean, to run three different commands and leave open three terminals/consoles are too many distractions.</p>
+<p>Fortunately, I found a npm package to run multiple commands <a href="https://github.com/kimmobrunfeldt/concurrently">concurrently</a>. With that I build two scripts:</p>
+<ol>
+<li><code>npm start</code> to start parcel development server and Typescript compiler to validate Types.</li>
+<li><code>npm test</code> to start Jest and Typescript compiler to validate Types.</li>
+</ol>
+<pre class="astro-code dracula" style="background-color:#282A36;overflow-x:auto;white-space:pre-wrap;word-wrap:break-word" tabindex="0"><code><span class="line"><span style="color:#F8F8F2">{</span></span>
+<span class="line"><span style="color:#F8F8F2">  </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">scripts</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> {</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">serve</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">parcel serve ./src/index.html</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">start</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">concurrently -r </span><span style="color:#FF79C6">\&quot;</span><span style="color:#F1FA8C">npm:serve</span><span style="color:#FF79C6">\&quot;</span><span style="color:#F1FA8C"> </span><span style="color:#FF79C6">\&quot;</span><span style="color:#F1FA8C">npm:type-check:watch</span><span style="color:#FF79C6">\&quot;</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">build</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">parcel build ./src/index.html</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">type-check</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">tsc --noEmit</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">type-check:watch</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">tsc --noEmit --watch</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">test</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">concurrently -r </span><span style="color:#FF79C6">\&quot;</span><span style="color:#F1FA8C">jest --watch</span><span style="color:#FF79C6">\&quot;</span><span style="color:#F1FA8C"> </span><span style="color:#FF79C6">\&quot;</span><span style="color:#F1FA8C">npm:type-check:watch</span><span style="color:#FF79C6">\&quot;</span><span style="color:#E9F284">&quot;</span><span style="color:#F8F8F2">,</span></span>
+<span class="line"><span style="color:#F8F8F2">    </span><span style="color:#8BE9FE">&quot;</span><span style="color:#8BE9FD">coverage</span><span style="color:#8BE9FE">&quot;</span><span style="color:#FF79C6">:</span><span style="color:#F8F8F2"> </span><span style="color:#E9F284">&quot;</span><span style="color:#F1FA8C">npm run type-check &amp;&amp; jest --coverage</span><span style="color:#E9F284">&quot;</span></span>
+<span class="line"><span style="color:#F8F8F2">  }</span></span>
+<span class="line"><span style="color:#F8F8F2">}</span></span></code></pre>
+<p>Finally, I could run the development environment using two terminals:</p>
+<p><img src="/content/posts/apprentices-will-not-understand-typescript/parcel-jest-run-terminal.png" alt="Parcel and Jest running in different terminals"/></p>
+<h3 id="conclusion">Conclusion</h3>
+<p>Parcel bundler does achieve a good job in being a <em>“Blazing fast, zero configuration web application bundler”</em>, it fulfills <a href="https://github.com/parcel-bundler/parcel#features" rel="noopener" target="_blank">basic web development needs</a>. However, I would not recommend its usage to build Web applications for any serious business. The lack of support for Typescript reflected in <a href="https://github.com/parcel-bundler/parcel/issues/4022" rel="noopener" target="_blank">this Github issue</a> needs all the attention possible and adopting a unit tests framework will be attractive.</p>
+<p>I did this exercise to challenge myself but I consider this type of efforts in solitary are tiring. A best solution to coach on modern web development would be to use tools like <a href="https://codesandbox.io/" rel="noopener" target="_blank">codesandbox.io</a>, and to play only with Typescript <a href="https://www.typescriptlang.org/play" rel="noopener" target="_blank">TS Playground</a>.</p>
+<p>For companies, if they use Angular or React there are specific tools to manage project for each. Taking the approach of building an in-house solution to build and deploy Web applications should be evaluated technically and from the business perspective as well (is it the purpose of the team to maintain such a tool?). From my experience and perspective, I have maintained Webpack configurations for companies’ projects and the effort is not worth if you are the only one taking care of it but receive all team member complains.<br/>
+That being said, I could recommend <a href="https://github.com/nrwl/nx" rel="noopener" target="_blank">Nx</a> to any company having different JS/TS projects and looking to integrate them in a Monorepo to leverage code reusability. It is the tool I think of whenever I have to start a project of any size.</p>
+<blockquote>
+<p>I hope you liked it.</p>
+</blockquote>
+
+    <footer>
+      <div class="tw-text-right tw-mb-3">
+      <a class="primary-link" href="/posts/testing-exported-functions-using-jest">
+        Testing named exported recursive functions using Jest →
+      </a>
+    </div>
+<a class="primary-link" href="/posts/templateref-projection-with-context-inside-component">
+      ← TemplateRef projection with Context in an Angular Component
+    </a>
+      <hr>
+      <p>
+  Written by <strong>Luis C. Ruiz</strong>. A proactive and disciplined
+  Sr. Software Engineer with rock-solid programming skills in
+  Javascript/Typescript.
+</p>
+<p class="tw-text-right">
+  <a class="primary-link" href="https://www.linkedin.com/in/inglkruiz" target="_blank" rel="noopener noreferrer">
+    Read more about me on LinkedIn.
+  </a>
+</p>
+    </footer>
+  </article>
+    </main>
+
+    <footer class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-10 tw-pb-4 tw-w-full dark:tw-bg-gradient-to-t dark:tw-from-neutral-800 dark:tw-via-neutral-800 dark:tw-via-80%">
+      © 2023. Built with ❤️ by 
+      <a class="primary-link" href="https://github.com/inglkruiz" target="_blank" rel="noopener noreferrer">
+        @inglkruiz
+      </a>
+      using
+       
+      <a href="https://astro.build/" class="primary-link hover:tw-underline-offset-8">
+        🚀 Astro v2.4.5 🌙
+      </a>
+    </footer>
+  </body>
+</html>
