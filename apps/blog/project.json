@@ -28,6 +28,27 @@
     },
     "sync": {
       "executor": "@nxtensions/astro:sync"
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "self"
+        }
+      ],
+      "options": {
+        "commands": [
+          "touch dist/apps/blog/.nojekyll",
+          "gh-pages --dotfiles --dist dist/apps/blog --branch master"
+        ]
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rm -rf dist/apps/blog"
+      }
     }
   },
   "tags": ["blog"]
