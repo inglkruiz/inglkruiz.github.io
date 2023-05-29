@@ -1,0 +1,6 @@
+{
+  "tailwindCSS.rootFontSize": 20,
+  "files.associations": {
+    "*.mdx": "markdown"
+  }
+}

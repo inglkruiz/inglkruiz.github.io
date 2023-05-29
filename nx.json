@@ -1,39 +1,28 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "plugins": ["@nxtensions/astro"],
   "npmScope": "nx-inglkruiz",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": ["default"],
+    "sharedGlobals": []
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
+    "check": {
+      "inputs": ["production", "^production"]
+    }
+  },
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx-cloud",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ],
+        "cacheableOperations": ["build", "lint", "test", "e2e", "check"],
         "accessToken": "MDFhZDg4M2ItZjA0Yy00ZGE1LWFmN2MtYTBmYWU4OGIwMWNkfHJlYWQtd3JpdGU="
       }
     }
   },
-  "targetDefaults": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
-    }
-  },
-  "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
-    "production": [
-      "default"
-    ],
-    "sharedGlobals": []
-  }
+  "defaultProject": "blog"
 }

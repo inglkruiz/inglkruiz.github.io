@@ -1,0 +1,61 @@
+@import 'typeface-quattrocento-sans';
+@import 'typeface-work-sans';
+/* Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+  html {
+    font-size: 20px;
+  }
+
+  h1,h2,h3,h4,h5,h6 {
+    @apply tw-font-semibold;
+    font-family: 'Work Sans', 'ui-serif', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif';
+  }
+
+  h1 {
+    @apply tw-text-4xl;
+  }
+
+  h2 {
+    @apply tw-text-3xl;
+  }
+
+  h3 {
+    @apply tw-text-2xl;
+  }
+}
+
+@layer utilities {
+  .primary-text {
+    @apply tw-text-green-600 ;
+  }
+
+  .primary-link {
+    @apply primary-text tw-no-underline hover:tw-underline hover:tw-underline-offset-4 hover:tw-text-green-500;
+  }
+
+  .secondary-text {
+    @apply tw-text-white;
+  }
+}
+
+/* Shiki */
+
+pre.astro-code {
+  @apply tw-text-xs tw-px-2;
+}
+
+pre.astro-code code:not(.no-line-numbers) {
+  counter-reset: step;
+  counter-increment: step calc(var(--start, 1) - 1);
+}
+
+pre.astro-code code:not(.no-line-numbers) .line::before {
+  content: counter(step);
+  counter-increment: step;
+  @apply tw-w-6 tw-mr-6 tw-inline-block tw-text-right tw-text-zinc-600;
+}

@@ -1,0 +1,29 @@
+---
+import type { Props as PostProps } from '../../layouts/Post.astro';
+import { getAllPosts } from '../../utils/content';
+
+export type Props = PostProps;
+
+const { post } = Astro.props;
+const allPost = await getAllPosts();
+const postIndex = allPost.findIndex((p) => p.slug === post.slug);
+const prevPost = allPost[postIndex + 1];
+const nextPost = allPost[postIndex - 1];
+---
+
+{
+  nextPost ? (
+    <div class="tw-text-right tw-mb-3">
+      <a class="primary-link" href={`/posts/${nextPost.slug}`}>
+        {nextPost.data.title} →
+      </a>
+    </div>
+  ) : null
+}
+{
+  prevPost ? (
+    <a class="primary-link" href={`/posts/${prevPost.slug}`}>
+      ← {prevPost.data.title}
+    </a>
+  ) : null
+}

@@ -1,0 +1,29 @@
+---
+import { AppConfig } from '../config/app';
+import BaseLayout from '../layouts/Base.astro';
+import Bio from '../partials/Bio.astro';
+import PostTile from '../partials/PostTile.astro';
+import { getAllPosts } from '../utils/content';
+
+const { title, description } = AppConfig;
+const allPosts = await getAllPosts();
+---
+
+<BaseLayout head={{ title, description }}>
+  <header slot="header" class="tw-mb-6">
+    <h1>
+      <a
+        href="/"
+        class="secondary-text tw-text-5xl tw-font-bold hover:tw-no-underline tw-text-neutral-100 hover:tw-text-neutral-100"
+      >
+        {title}
+      </a>
+    </h1>
+  </header>
+  <div slot="content">
+    <div class="tw-mb-6">
+      <Bio />
+    </div>
+    {allPosts.map((post) => <PostTile post={post} />)}
+  </div>
+</BaseLayout>

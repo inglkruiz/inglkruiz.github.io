@@ -1,0 +1,34 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import readingTime from 'reading-time';
+import { fromat_MMMM_dd_yyy } from '../utils/date-fns';
+
+export type Props = {
+  post: CollectionEntry<'posts'>;
+};
+
+const { post } = Astro.props;
+const { collection, slug, body } = post;
+const { title, excerpt, publishDate } = post.data;
+---
+
+<a class="" href={`/${collection}/${slug}`}>
+  <article
+    class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-white"
+  >
+    <header class="tw-mb-3">
+      <h3 class="tw-mb-1 secondary-text">
+        {title}
+      </h3>
+      <small>{fromat_MMMM_dd_yyy(publishDate)}</small> - {
+        readingTime(body).text
+      }
+    </header>
+    <section class="tw-mb-3">
+      <p set:html={excerpt} />
+    </section>
+    <footer class="tw-text-right">
+      <span class="primary-link">Read more →</span>
+    </footer>
+  </article>
+</a>

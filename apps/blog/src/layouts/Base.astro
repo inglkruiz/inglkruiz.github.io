@@ -1,0 +1,87 @@
+---
+import { AppConfig } from '../config/app';
+import '../styles/global.css';
+
+export type Props = {
+  head: {
+    title: string;
+    description: string;
+  };
+};
+
+const {
+  head: { title, description },
+} = Astro.props;
+
+const footerDate = new Date().getFullYear();
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={AppConfig.author} />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- <link rel="alternate" type="application/rss+xml" href="/rss.xml" /> -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico" /> -->
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
+  <body
+    class="tw-container tw-mx-auto tw-min-h-screen tw-text-gray-600 dark:tw-bg-neutral-800 dark:tw-text-gray-300 tw-pt-8"
+  >
+    <slot name="header" />
+
+    <main class="tw-pb-20">
+      <slot name="content" />
+    </main>
+
+    <footer
+      class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-10 tw-pb-4 tw-w-full dark:tw-bg-gradient-to-t dark:tw-from-neutral-800 dark:tw-via-neutral-800 dark:tw-via-80%"
+    >
+      © {footerDate}. Built with ❤️ by{' '}
+      <a
+        class="primary-link"
+        href="https://github.com/inglkruiz"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        @inglkruiz
+      </a>
+      using
+      {` `}
+      <a
+        href="https://astro.build/"
+        class="primary-link hover:tw-underline-offset-8"
+      >
+        🚀 {Astro.generator} 🌙
+      </a>
+    </footer>
+  </body>
+</html>
+
+<script>
+  type Theme = 'tw-light' | 'tw-dark';
+
+  const theme: Theme = (() => {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+      return (localStorage.getItem('theme') as Theme) ?? 'tw-dark';
+    }
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'tw-dark';
+    }
+    return 'tw-light';
+  })();
+
+  if (theme === 'tw-light') {
+    document.documentElement.classList.remove('tw-dark');
+  } else {
+    document.documentElement.classList.add('tw-dark');
+  }
+
+  window.localStorage.setItem('theme', theme);
+</script>
