@@ -12,15 +12,15 @@
     <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico" /> -->
     <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
     <link rel="icon" type="image/png" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/_...slug_.7c1fecbf.css" /><script type="module">const e=(()=>typeof localStorage<"u"&&localStorage.getItem("theme")?localStorage.getItem("theme")??"tw-dark":window.matchMedia("(prefers-color-scheme: dark)").matches?"tw-dark":"tw-light")();e==="tw-light"?document.documentElement.classList.remove("tw-dark"):document.documentElement.classList.add("tw-dark");window.localStorage.setItem("theme",e);
-</script></head>
-  <body class="tw-container tw-mx-auto tw-min-h-screen tw-text-gray-600 dark:tw-bg-neutral-800 dark:tw-text-gray-300 tw-pt-8">
-    <header class="tw-mb-6">
+  <link rel="stylesheet" href="/assets/_...slug_.9b01769f.css" /><script type="module" src="/assets/hoisted.1bcbc5bb.js"></script></head>
+  <body class="tw-container tw-mx-auto tw-min-h-screen tw-text-neutral-700 dark:tw-text-neutral-100 tw-bg-neutral-100 dark:tw-bg-neutral-800 tw-pt-8">
+    <header class="tw-mb-6 tw-flex tw-items-center">
     <h1>
-      <a href="/" class="secondary-text tw-text-5xl tw-font-bold hover:tw-no-underline tw-text-neutral-100 hover:tw-text-neutral-100">
+      <a href="/" class="secondary-text tw-text-5xl tw-font-bold hover:tw-no-underline hover:secondary-text">
         WhateverJS Blog
       </a>
     </h1>
+    <style>astro-island,astro-slot{display:contents}</style><script>(self.Astro=self.Astro||{}).only=t=>{(async()=>await(await t())())()},window.dispatchEvent(new Event("astro:only"));var l;{const c={0:t=>t,1:t=>JSON.parse(t,o),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(JSON.parse(t,o)),5:t=>new Set(JSON.parse(t,o)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(JSON.parse(t)),9:t=>new Uint16Array(JSON.parse(t)),10:t=>new Uint32Array(JSON.parse(t))},o=(t,s)=>{if(t===""||!Array.isArray(s))return s;const[e,n]=s;return e in c?c[e](n):void 0};customElements.get("astro-island")||customElements.define("astro-island",(l=class extends HTMLElement{constructor(){super(...arguments);this.hydrate=()=>{if(!this.hydrator||this.parentElement&&this.parentElement.closest("astro-island[ssr]"))return;const s=this.querySelectorAll("astro-slot"),e={},n=this.querySelectorAll("template[data-astro-template]");for(const r of n){const i=r.closest(this.tagName);!i||!i.isSameNode(this)||(e[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(const r of s){const i=r.closest(this.tagName);!i||!i.isSameNode(this)||(e[r.getAttribute("name")||"default"]=r.innerHTML)}const a=this.hasAttribute("props")?JSON.parse(this.getAttribute("props"),o):{};this.hydrator(this)(this.Component,a,e,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),window.removeEventListener("astro:hydrate",this.hydrate),window.dispatchEvent(new CustomEvent("astro:hydrate"))}}connectedCallback(){!this.hasAttribute("await-children")||this.firstChild?this.childrenConnectedCallback():new MutationObserver((s,e)=>{e.disconnect(),this.childrenConnectedCallback()}).observe(this,{childList:!0})}async childrenConnectedCallback(){window.addEventListener("astro:hydrate",this.hydrate);let s=this.getAttribute("before-hydration-url");s&&await import(s),this.start()}start(){const s=JSON.parse(this.getAttribute("opts")),e=this.getAttribute("client");if(Astro[e]===void 0){window.addEventListener(`astro:${e}`,()=>this.start(),{once:!0});return}Astro[e](async()=>{const n=this.getAttribute("renderer-url"),[a,{default:r}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),i=this.getAttribute("component-export")||"default";if(!i.includes("."))this.Component=a[i];else{this.Component=a;for(const d of i.split("."))this.Component=this.Component[d]}return this.hydrator=r,this.hydrate},s,this)}attributeChangedCallback(){this.hydrator&&this.hydrate()}},l.observedAttributes=["props"],l))}</script><astro-island uid="1RMPHR" component-url="/assets/ThemeToggle.f0e2b2f4.js" component-export="ThemeToggle" renderer-url="/assets/client-v17.64c279be.js" props="{&quot;className&quot;:[0,&quot;tw-ml-auto&quot;]}" ssr="" client="only" opts="{&quot;name&quot;:&quot;ThemeToggle&quot;,&quot;value&quot;:&quot;react&quot;}"></astro-island>
   </header>
 
     <main class="tw-pb-20">
@@ -38,7 +38,7 @@
 </p>
     </div>
     <a class="" href="/posts/testing-exported-functions-using-jest">
-  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-white">
+  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-200 dark:tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-neutral-400 dark:hover:tw-border-white">
     <header class="tw-mb-3">
       <h3 class="tw-mb-1 secondary-text">
         Testing named exported recursive functions using Jest
@@ -53,7 +53,7 @@
     </footer>
   </article>
 </a><a class="" href="/posts/apprentices-will-not-understand-typescript">
-  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-white">
+  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-200 dark:tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-neutral-400 dark:hover:tw-border-white">
     <header class="tw-mb-3">
       <h3 class="tw-mb-1 secondary-text">
         Apprentices won&#39;t understand Typescript, I heard
@@ -68,7 +68,7 @@
     </footer>
   </article>
 </a><a class="" href="/posts/templateref-projection-with-context-inside-component">
-  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-white">
+  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-200 dark:tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-neutral-400 dark:hover:tw-border-white">
     <header class="tw-mb-3">
       <h3 class="tw-mb-1 secondary-text">
         TemplateRef projection with Context in an Angular Component
@@ -83,7 +83,7 @@
     </footer>
   </article>
 </a><a class="" href="/posts/angular-material-reusable-autocomplete">
-  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-white">
+  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-200 dark:tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-neutral-400 dark:hover:tw-border-white">
     <header class="tw-mb-3">
       <h3 class="tw-mb-1 secondary-text">
         Reusable Angular Material Input Autocomplete form control
@@ -98,7 +98,7 @@
     </footer>
   </article>
 </a><a class="" href="/posts/whatever-js">
-  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-white">
+  <article class="tw-mb-4 tw-p-2 tw-rounded-lg tw-bg-neutral-200 dark:tw-bg-neutral-700 tw-border-2 tw-border-transparent hover:tw-border-neutral-400 dark:hover:tw-border-white">
     <header class="tw-mb-3">
       <h3 class="tw-mb-1 secondary-text">
         What is this Blog about?
@@ -116,7 +116,7 @@
   </div>
     </main>
 
-    <footer class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-10 tw-pb-4 tw-w-full dark:tw-bg-gradient-to-t dark:tw-from-neutral-800 dark:tw-via-neutral-800 dark:tw-via-80%">
+    <footer class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-4 dark:tw-pt-10 tw-pb-4 tw-w-full tw-bg-neutral-100 dark:tw-bg-transparent dark:tw-bg-gradient-to-t dark:tw-via-95% dark:tw-via-80% dark:tw-from-neutral-800 dark:tw-via-neutral-800">
       © 2023. Built with ❤️ by 
       <a class="primary-link" href="https://github.com/inglkruiz" target="_blank" rel="noopener noreferrer">
         @inglkruiz

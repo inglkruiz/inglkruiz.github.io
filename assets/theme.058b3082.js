@@ -1,0 +1,1 @@
+const o=t();function a(e){e==="tw-light"?document.documentElement.classList.remove("tw-dark"):document.documentElement.classList.add("tw-dark"),localStorage.setItem("theme",e)}function t(){return typeof localStorage<"u"&&localStorage.getItem("theme")?localStorage.getItem("theme"):window.matchMedia("(prefers-color-scheme: dark)").matches?"tw-dark":"tw-light"}export{o as C,a as s};

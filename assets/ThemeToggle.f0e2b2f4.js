@@ -1,0 +1,12 @@
+import{r as a}from"./index.c8d0b318.js";import{C as h,s as _}from"./theme.058b3082.js";function p(o){return o&&o.__esModule&&Object.prototype.hasOwnProperty.call(o,"default")?o.default:o}var m={exports:{}};/*!
+	Copyright (c) 2018 Jed Watson.
+	Licensed under the MIT License (MIT), see
+	http://jedwatson.github.io/classnames
+*/(function(o){(function(){var e={}.hasOwnProperty;function n(){for(var r=[],s=0;s<arguments.length;s++){var t=arguments[s];if(t){var l=typeof t;if(l==="string"||l==="number")r.push(t);else if(Array.isArray(t)){if(t.length){var i=n.apply(null,t);i&&r.push(i)}}else if(l==="object"){if(t.toString!==Object.prototype.toString&&!t.toString.toString().includes("[native code]")){r.push(t.toString());continue}for(var f in t)e.call(t,f)&&t[f]&&r.push(f)}}}return r.join(" ")}o.exports?(n.default=n,o.exports=n):window.classNames=n})()})(m);var y=m.exports;const x=p(y);var d={exports:{}},u={};/** @license React v17.0.2
+ * react-jsx-runtime.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */var g=a,v=60103;u.Fragment=60107;if(typeof Symbol=="function"&&Symbol.for){var c=Symbol.for;v=c("react.element"),u.Fragment=c("react.fragment")}var E=g.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner,O=Object.prototype.hasOwnProperty,S={key:!0,ref:!0,__self:!0,__source:!0};function w(o,e,n){var r,s={},t=null,l=null;n!==void 0&&(t=""+n),e.key!==void 0&&(t=""+e.key),e.ref!==void 0&&(l=e.ref);for(r in e)O.call(e,r)&&!S.hasOwnProperty(r)&&(s[r]=e[r]);if(o&&o.defaultProps)for(r in e=o.defaultProps,e)s[r]===void 0&&(s[r]=e[r]);return{$$typeof:v,type:o,key:t,ref:l,props:s,_owner:E.current}}u.jsx=w;u.jsxs=w;d.exports=u;var b=d.exports;const j=p(b),{jsx:k,jsxs:C,Fragment:P}=j,T=({className:o})=>{const[e,n]=a.useState(h),[r,s]=a.useState(!1);if(a.useEffect(()=>{s(!0)},[]),a.useEffect(()=>{_(e)},[e]),!r)return null;const t=()=>{n(e==="tw-light"?"tw-dark":"tw-light")};return k("button",{className:x("tw-bg-gradient-to-bl hover:tw-bg-gradient-to-tr tw-from-green-500 tw-to-green-800  hover:tw-from-green-500 hover:tw-to-green-800 dark:tw-from-neutral-500 dark:tw-to-neutral-800  dark:hover:tw-from-neutral-500 dark:hover:tw-to-neutral-800  tw-px-3 tw-py-2 tw-rounded-full",o),onClick:t,children:e==="tw-light"?"🌙":"🌞"})};export{T as ThemeToggle};
