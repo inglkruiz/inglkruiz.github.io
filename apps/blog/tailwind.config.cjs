@@ -27,22 +27,33 @@ module.exports = {
       typography: (theme) => ({
         DEFAULT: {
           css: {
-            '--tw-prose-body': theme('colors.neutral.400'),
-            '--tw-prose-headings': theme('colors.neutral.100'),
-            '--tw-prose-bold': theme('colors.neutral.400'),
-            '--tw-prose-code': theme('colors.yellow.200'),
-            '--tw-prose-bullets': theme('colors.neutral.400'),
-            '--tw-prose-counters': theme('colors.neutral.400'),
-            '--tw-prose-links': theme('colors.neutral.400'),
-            '--tw-prose-quotes': theme('colors.neutral.100'),
+            '--tw-prose-body': theme('colors.neutral.700'),
+            '--tw-prose-headings': theme('colors.neutral.900'),
+            '--tw-prose-bold': theme('colors.neutral.700'),
+            '--tw-prose-code': theme('colors.pink.600'),
+            '--tw-prose-bullets': theme('colors.neutral.900'),
+            '--tw-prose-counters': theme('colors.neutral.700'),
+            '--tw-prose-links': theme('colors.green.600'),
+            '--tw-prose-quotes': theme('colors.neutral.900'),
             '--tw-prose-quote-borders': theme('colors.green.500'),
+            '--tw-prose-hr': theme('colors.neutral.400'),
+            // dark mode
+            '--tw-prose-invert-body': theme('colors.neutral.100'),
+            '--tw-prose-invert-headings': theme('colors.neutral.50'),
+            '--tw-prose-invert-bold': theme('colors.neutral.100'),
+            '--tw-prose-invert-code': theme('colors.yellow.200'),
+            '--tw-prose-invert-bullets': theme('colors.neutral.100'),
+            '--tw-prose-invert-counters': theme('colors.neutral.100'),
+            '--tw-prose-invert-links': theme('colors.green.600'),
+            '--tw-prose-invert-quotes': theme('colors.neutral.50'),
+            '--tw-prose-invert-quote-borders': theme('colors.green.500'),
+            '--tw-prose-invert-hr': theme('colors.neutral.100'),
             a: {
-              color: theme('colors.green.600'),
               textDecoration: 'none',
               fontWeight: theme('fontWeight.semibold'),
               '&:hover': {
                 textDecoration: 'underline',
-                textUnderlineOffset: '0.25rem',
+                textUnderlineOffset: theme('spacing.1'),
               },
             },
             hr: {

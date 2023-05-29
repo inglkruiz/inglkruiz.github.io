@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import readingTime from 'reading-time';
+import { ThemeToggle } from '../components/react/ThemeToggle';
 import { AppConfig } from '../config/app';
 import Bio from '../partials/Bio.astro';
 import PostNav from '../partials/layouts/PostNav.astro';
@@ -17,24 +18,30 @@ const { data: postFrontmatter, body } = post;
 ---
 
 <BaseLayout head={{ title: postFrontmatter.title, description }}>
-  <header slot="header">
-    <h3>
-      <a href="/" class="tw-text-lg tw-font-semibold tw-text-neutral-100">
+  <header slot="header" class="tw-flex tw-items-center">
+    <h3 class="tw-text-lg tw-font-semibold secondary-text">
+      <a href="/">
         {title}
       </a>
     </h3>
+    <ThemeToggle client:only="react" className="tw-ml-auto" />
   </header>
-  <article slot="content" class="tw-prose tw-max-w-3xl tw-mx-auto">
-    <header id="postHeader" class="tw-sticky tw-top-0">
-      <div class="tw-pt-4 dark:tw-bg-neutral-800">
-        <h1 id="postTite" class="tw-text-2xl tw-font-semibold tw-mb-1">
+  <article
+    slot="content"
+    class="tw-prose dark:tw-prose-invert tw-max-w-3xl tw-mx-auto"
+  >
+    <header class="tw-sticky tw-top-0">
+      <div class="tw-pt-4 tw-bg-neutral-100 dark:tw-bg-neutral-800">
+        <h1 class="tw-text-2xl tw-font-semibold tw-mb-1 secondary-text">
           {postFrontmatter.title}
         </h1>
         <small>
           {fromat_MMMM_dd_yyy(postFrontmatter.publishDate)}
         </small> - {readingTime(body).text}
       </div>
-      <div class="tw-h-6 dark:tw-bg-gradient-to-b dark:tw-from-neutral-800">
+      <div
+        class="dark:tw-h-6 dark:tw-bg-gradient-to-b dark:tw-from-neutral-800"
+      >
       </div>
     </header>
     <PostNav post={post} />

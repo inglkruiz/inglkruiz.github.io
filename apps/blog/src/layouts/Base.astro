@@ -35,7 +35,7 @@ const footerDate = new Date().getFullYear();
     <link rel="icon" type="image/png" href="/favicon.png" />
   </head>
   <body
-    class="tw-container tw-mx-auto tw-min-h-screen tw-text-gray-600 dark:tw-bg-neutral-800 dark:tw-text-gray-300 tw-pt-8"
+    class="tw-container tw-mx-auto tw-min-h-screen tw-text-neutral-700 dark:tw-text-neutral-100 tw-bg-neutral-100 dark:tw-bg-neutral-800 tw-pt-8"
   >
     <slot name="header" />
 
@@ -44,7 +44,7 @@ const footerDate = new Date().getFullYear();
     </main>
 
     <footer
-      class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-10 tw-pb-4 tw-w-full dark:tw-bg-gradient-to-t dark:tw-from-neutral-800 dark:tw-via-neutral-800 dark:tw-via-80%"
+      class="tw-fixed tw-bottom-0 tw-left-0 tw-px-4 tw-pt-4 dark:tw-pt-10 tw-pb-4 tw-w-full tw-bg-neutral-100 dark:tw-bg-transparent dark:tw-bg-gradient-to-t dark:tw-via-95% dark:tw-via-80% dark:tw-from-neutral-800 dark:tw-via-neutral-800"
     >
       © {footerDate}. Built with ❤️ by{' '}
       <a
@@ -68,23 +68,7 @@ const footerDate = new Date().getFullYear();
 </html>
 
 <script>
-  type Theme = 'tw-light' | 'tw-dark';
+  import { CHOSEN_THEME, setDocumentTheme } from '../utils/theme';
 
-  const theme: Theme = (() => {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-      return (localStorage.getItem('theme') as Theme) ?? 'tw-dark';
-    }
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'tw-dark';
-    }
-    return 'tw-light';
-  })();
-
-  if (theme === 'tw-light') {
-    document.documentElement.classList.remove('tw-dark');
-  } else {
-    document.documentElement.classList.add('tw-dark');
-  }
-
-  window.localStorage.setItem('theme', theme);
+  setDocumentTheme(CHOSEN_THEME);
 </script>

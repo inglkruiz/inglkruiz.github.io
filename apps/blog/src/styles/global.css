@@ -29,7 +29,7 @@
 
 @layer utilities {
   .primary-text {
-    @apply tw-text-green-600 ;
+    @apply tw-text-green-600;
   }
 
   .primary-link {
@@ -37,7 +37,7 @@
   }
 
   .secondary-text {
-    @apply tw-text-white;
+    @apply tw-text-neutral-900 dark:tw-text-neutral-50;
   }
 }
 
